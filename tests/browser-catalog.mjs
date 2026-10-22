@@ -336,7 +336,7 @@ try {
     await theme(false);
   });
 
-  for (const width of [375, 768, 1280]) for (const dark of [false, true]) for (const [page, path] of [['semestre', '/semestres/1'], ['ramo', '/ramos/calculo-i?tipo=certamenes&anio=2024&periodo=2&numero=2']]) {
+  for (const width of [375, 768, 1280, 1440]) for (const dark of [false, true]) for (const [page, path] of [['semestre', '/semestres/1'], ['ramo', '/ramos/calculo-i?tipo=certamenes&anio=2024&periodo=2&numero=2']]) {
     await check(`Responsive ${page} ${width}px ${dark ? 'dark' : 'light'} + screenshot`, async () => {
       await viewport(width); await navigate(path); await theme(dark);
       const layout = await evaluate(`(() => {const w=innerWidth;return {width:w,scrollWidth:document.documentElement.scrollWidth,bodyScrollWidth:document.body.scrollWidth,overflow:[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.left < -1 || r.right>w+1)&&getComputedStyle(e).position!=='absolute'}).slice(0,12).map(e=>({tag:e.tagName,id:e.id,text:e.innerText?.slice(0,80),left:e.getBoundingClientRect().left,right:e.getBoundingClientRect().right})),headings:[...document.querySelectorAll('h1,h2')].map(e=>({text:e.innerText,client:e.clientWidth,scroll:e.scrollWidth})),menuVisible:document.querySelector('button[aria-label="Navegación principal"]').getBoundingClientRect().width>0};})()`);
@@ -344,7 +344,7 @@ try {
       await snapshot(`${page}-${width}-${dark ? 'dark' : 'light'}`);
       assert.ok(layout.scrollWidth <= width && layout.bodyScrollWidth <= width, `horizontal overflow: ${JSON.stringify(layout)}`);
       assert.ok(layout.headings.every(heading => heading.scroll <= heading.client), 'headings not clipped horizontally');
-      assert.equal(layout.menuVisible, width < 768);
+      assert.equal(layout.menuVisible, width < 1024);
       const contrast = await evaluate(`(() => {
         const rgb=s=>(s.match(/[\\d.]+/g)||[]).map(Number);
         const lum=c=>c.slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0);

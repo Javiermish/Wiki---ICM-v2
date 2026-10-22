@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { CatalogFilters, PublicMaterial } from "@/domain/catalog";
+import { useCourseCatalog } from "./course-catalog-provider";
+import { semesterCourses } from "@/lib/catalog/query";
 
 export function SemesterSection({ semesters, materials, filters }: { semesters: readonly number[]; materials: readonly PublicMaterial[]; filters: CatalogFilters }) {
+  const { catalog } = useCourseCatalog();
   return (
     <section id="explorar" aria-labelledby="semesters-heading" className="section-spacing">
       <div className="mb-6 max-w-2xl">
@@ -12,7 +17,7 @@ export function SemesterSection({ semesters, materials, filters }: { semesters: 
       <div className="grid gap-4 md:grid-cols-2">
         {semesters.map((semester) => {
           const entries = materials.filter((material) => material.course.curricularSemester === semester);
-          const courses = [...new Map(entries.map((material) => [material.course.id, material.course])).values()];
+           const courses = semesterCourses(catalog, semester);
           const current = filters.curricularSemester === semester;
           return (
             <section key={semester} className={`rounded-xl border bg-card p-5 sm:p-6 ${current ? "border-primary" : "border-border"}`} aria-labelledby={`semester-${semester}`}>

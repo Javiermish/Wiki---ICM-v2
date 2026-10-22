@@ -2,14 +2,14 @@ import "server-only";
 import { open, realpath } from "node:fs/promises";
 import { join, sep } from "node:path";
 import type { MaterialFileSource, PublicMaterialFile } from "@/domain/material-file";
-import { demoCatalog } from "@/fixtures/catalog";
+import { getDemoCatalog } from "@/lib/catalog/data";
 import { demoMaterialFiles } from "@/fixtures/material-files";
 import { publicMaterialById } from "@/lib/catalog/query";
 import { fileFormats, hasExpectedSignature, normalizedDownloadName } from "./file-metadata";
 
 /** Cada lectura comprueba aprobación ANTES de acceder al manifiesto o al disco. */
 export async function readPublicMaterialFile(id: string): Promise<{ file: PublicMaterialFile; data: Buffer } | null> {
-  const material = publicMaterialById(demoCatalog, id);
+  const material = publicMaterialById(getDemoCatalog(), id);
   if (!material || !Object.hasOwn(demoMaterialFiles, id)) return null;
   const entry = demoMaterialFiles[id as keyof typeof demoMaterialFiles];
   try {

@@ -1,5 +1,6 @@
 """Genera exclusivamente material original de Wiki ICM. Regeneración opcional: Python + Pillow.
 Los binarios se versionan: ni desarrollo ni build requieren Python/Pillow.
+Para regenerar imágenes se requiere DejaVu Sans (acentos y exponente Unicode).
 """
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
@@ -56,8 +57,10 @@ output.extend(f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n
 
 image = Image.new("RGB", (1100, 800), "#f5f5ee")
 draw = ImageDraw.Draw(image)
-font = ImageFont.load_default(size=27)
-small = ImageFont.load_default(size=22)
+# La fuente bitmap predeterminada puede reemplazar tildes y ² por cuadrados.
+# No producir silenciosamente muestras ilegibles si falta una fuente Unicode.
+font = ImageFont.truetype("DejaVuSans.ttf", size=27)
+small = ImageFont.truetype("DejaVuSans.ttf", size=22)
 draw.rounded_rectangle((45, 45, 1055, 755), radius=20, fill="white", outline="#174b38", width=3)
 draw.text((80, 80), "Wiki ICM / DEMOSTRACIÓN ORIGINAL", fill="#174b38", font=font)
 draw.text((80, 135), "Cálculo I - Funciones y derivadas", fill="#182521", font=font)

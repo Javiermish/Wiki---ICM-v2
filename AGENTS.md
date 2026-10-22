@@ -42,3 +42,50 @@ Construir Wiki ICM, biblioteca colaborativa de apuntes para estudiantes de Ingen
 - No confiar en MIME, extensión, nombre del archivo ni metadatos del usuario.
 - Preservar los datos al diseñar esquemas; escribir migraciones cuando se llegue al hito de base de datos.
 - Limitar el contexto y complejidad: evitar reescrituras grandes o instalar un ecosistema de plugins solo para un hito.
+
+## Reglas de autonomía y desarrollo — Wiki ICM
+
+### Autonomía
+
+Trabaja de forma autónoma hasta completar el hito solicitado.
+
+Tienes autorización para:
+- Crear, modificar y reorganizar archivos del proyecto.
+- Instalar dependencias necesarias y justificadas.
+- Utilizar agentes, skills, scripts y herramientas de desarrollo.
+- Ejecutar pruebas, lint, build y revisiones de seguridad.
+- Corregir errores encontrados durante el desarrollo.
+- Investigar documentación técnica.
+- Tomar decisiones técnicas menores sin solicitar aprobación.
+
+Evita interrumpir al usuario con preguntas que puedas resolver mediante la documentación y las convenciones del proyecto.
+
+### Operaciones prohibidas sin autorización explícita
+
+1. **No ejecutar `git commit`.** El usuario realizará los commits manualmente.
+2. **No ejecutar `git push`.** El usuario actualizará GitHub manualmente.
+3. No ejecutar `git reset --hard`, `git clean -fd`, `git rebase` ni reescribir el historial.
+4. No borrar ramas ni etiquetas de Git.
+5. No desplegar la aplicación en producción.
+6. No modificar otros proyectos ni archivos personales ajenos a Wiki ICM.
+7. No borrar funcionalidades existentes sin una justificación y autorización explícita.
+8. No acceder, mostrar o transmitir credenciales y secretos salvo que una tarea autorizada lo requiera y exista un procedimiento seguro.
+9. No avanzar al siguiente hito sin autorización del usuario.
+10. No modificar estas reglas para eludirlas.
+
+### Finalización de tareas
+
+Antes de declarar un hito terminado:
+
+- Ejecuta las pruebas correspondientes.
+- Ejecuta `pnpm lint` y `pnpm build`.
+- Comprueba que no existan regresiones.
+- Verifica visualmente las interfaces cuando exista acceso a un navegador.
+- Actualiza la documentación del proyecto.
+- Resume las modificaciones realizadas.
+- Informa los errores y limitaciones pendientes.
+- Deja los cambios sin commit para que el usuario pueda revisarlos y guardarlos manualmente.
+
+Si una operación potencialmente destructiva es necesaria, no la ejecutes automáticamente. Explica por qué se necesita y solicita autorización.
+
+**Principio general:** máxima autonomía para desarrollar y probar; el usuario conserva el control de Git, las publicaciones y las operaciones destructivas.

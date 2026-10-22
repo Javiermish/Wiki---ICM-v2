@@ -3,6 +3,9 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { PrototypeNotice } from "@/components/layout/prototype-notice";
 import { themeInitializationScript } from "@/lib/theme";
+import { CourseCatalogProvider } from "@/components/catalog/course-catalog-provider";
+import { FavoritesProvider } from "@/components/catalog/favorites-provider";
+import { getPublicDemoCatalog } from "@/lib/catalog/data";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,10 +26,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col">
         <a href="#contenido" className="fixed top-3 left-4 z-50 -translate-y-24 rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground focus:translate-y-0">Saltar al contenido</a>
-        <SiteHeader />
-        <PrototypeNotice />
-        {children}
-        <SiteFooter />
+        <CourseCatalogProvider initialCatalog={getPublicDemoCatalog()}>
+          <FavoritesProvider>
+          <SiteHeader />
+          <PrototypeNotice />
+          {children}
+          <SiteFooter />
+          </FavoritesProvider>
+        </CourseCatalogProvider>
       </body>
     </html>
   );

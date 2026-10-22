@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -23,8 +24,8 @@ export function MobileNavigation({
   function followLink(href: string) {
     const target = document.getElementById(href.split("#")[1] ?? "");
     if (target) {
-      // Move focus out of the panel before hiding its links. Native navigation
-      // still updates the URL and scrolls to the chosen section.
+      // Move focus out of the panel before hiding its links. Next Link keeps
+      // client providers mounted while navigating and scrolling to the section.
       if (!target.hasAttribute("tabindex")) {
         target.setAttribute("tabindex", "-1");
         target.addEventListener(
@@ -42,7 +43,7 @@ export function MobileNavigation({
 
   return (
     <div
-      className="md:hidden"
+      className="lg:hidden"
       onKeyDown={(event) => {
         if (event.key === "Escape" && isOpen) {
           event.preventDefault();
@@ -81,7 +82,7 @@ export function MobileNavigation({
         <ul className="page-container space-y-1 py-3">
           {links.map((link) => (
             <li key={link.href}>
-              <a
+              <Link
                 href={link.href}
                 className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:bg-muted"
                 onClick={(event) => {
@@ -95,7 +96,7 @@ export function MobileNavigation({
                 }}
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

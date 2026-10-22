@@ -9,7 +9,7 @@ Biblioteca colaborativa de Ingeniería Civil Matemática (UdeC) para encontrar, 
 - Moderador: revisa/acepta/rechaza aportes; corrige metadatos; atiende reportes; requiere rol comprobado por servidor.
 
 ## Funciones no negociables (v1)
-- Índice por semestres curriculares y ramos.
+- Índice por semestres curriculares y ramos, con electivos agrupados por área sin semestre curricular obligatorio.
 - Listados, Apuntes y Certámenes dentro de cada ramo.
 - Etiquetas públicas normalizadas, con número y periodo académico real (`Certamen 2 - 2024-2`).
 - Visor PDF/imagen incorporado y botón de descarga.
@@ -20,12 +20,16 @@ Biblioteca colaborativa de Ingeniería Civil Matemática (UdeC) para encontrar, 
 ## Principios de UX
 Tres clics aproximados desde inicio a un material relevante (no regla técnica rígida). Buscador siempre identificable. Fecha académica visible en todas las tarjetas. Previsualización es acción principal en documentos. Estados vacíos útiles, nunca errores silenciosos.
 
-## Fuera de Hito 1
-Autenticación real, base de datos real, upload real, visor PDF real, moderación real y deploy. Hito 1 los representa como pantallas estáticas/mocks y componentes accesibles.
+## Límite inicial de Hito 1 y ampliaciones autorizadas
+El alcance inicial excluía autenticación real, base de datos real, upload real, visor PDF real, moderación real y deploy; los representaba con pantallas estáticas/mocks y componentes accesibles. Las ampliaciones siguientes detallan las excepciones autorizadas. Autenticación, DB, Storage, subida, moderación y despliegue reales continúan fuera del alcance vigente.
 
 **Ampliación autorizada en Hito 1.3:** lectura PDF e imágenes y descarga reales, exclusivamente con archivos locales originales de demostración. Reportes explícitamente simulados. No se habilitan servicios de autenticación, DB, Storage, subidas, moderación ni despliegue. El Hito 1.4 requiere aprobación independiente.
 
 **Ampliación autorizada en Hito 1.4:** formulario `/aportar` completo, con metadatos estructurados, selección de un archivo local PDF/JPEG/PNG/WebP de hasta 25 MiB y previsualización con el lector existente. Solo estado en memoria y confirmación explícita de simulación; ningún archivo se envía, persiste, publica ni ingresa a moderación. La ampliación no autoriza Hito 1.5 ni servicios reales.
+
+**Ampliación vigente Hito 1.4.1:** electivos por área (`/electivos?area=…`), gestión de asignaturas (`/gestion/asignaturas`) y favoritos DEMO locales (`/favoritos`), integrados con catálogo, aportes y documentos. Gestión pública sin login ni permisos efectivos: crear, editar, reclasificar, archivar y reabrir solo en memoria de la pestaña. Los favoritos son una selección de demostración, no guardado en una cuenta. La navegación cliente comparte estado; recargar/cerrar u otra pestaña parte del catálogo inicial. No se persisten ni comparten cambios y no se habilitan auth/DB/Storage, envío de solicitudes ni revisión real.
+
+Reclasificar conserva ID/slug, documentos y periodos académicos; archivar no despublica materiales aprobados. Todas las asignaturas, regulares o electivas, presentan Listados, Apuntes y Certámenes aunque estén vacías. Los datos siguen siendo ficticios, no una malla oficial. Contratos asíncronos preparan una integración futura de servidor con correo verificado, roles/RLS y solicitudes revisadas, sin implementarla. Alcance, decisiones y verificaciones pendientes: [HITO_1_4_1.md](HITO_1_4_1.md). **Se mantiene Hito 1.4; Hito 1.5 no está autorizado.**
 
 ## Restricciones
 No afirmar que los ramos de ejemplo conforman la malla oficial. No almacenar ni publicar documentos de terceros sin permiso. Moderación y políticas de acceso deben estar del lado del servidor en versión funcional.

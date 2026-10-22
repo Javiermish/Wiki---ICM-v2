@@ -39,6 +39,7 @@ test("navegación HTTP de semestres, ramos, categorías y filtros", { skip: !bas
     }
     assert.ok(!(await page("/semestres/2?q=calculo")).includes('href="/ramos/calculo-i"'));
     assert.ok((await page("/semestres/4")).includes("Aún no hay ramos de ejemplo"));
+    assert.ok((await page("/semestres/5")).includes("Aún no hay ramos de ejemplo"));
     assert.ok((await page("/semestres/3")).includes('href="/ramos/geometria"'));
     assert.ok((await page("/semestres/1?q=nada-coincide")).includes("Limpiar búsqueda"));
     assert.ok((await page("/semestres/1?q=uno&q=dos")).includes("usa un solo valor"));
@@ -99,7 +100,7 @@ test("navegación HTTP de semestres, ramos, categorías y filtros", { skip: !bas
 
   await t.test("IDs privados y rutas inválidas no son accesibles", async () => {
     for (const path of [
-      "/semestres/0", "/semestres/5", "/semestres/abc", "/semestres/1.0", "/semestres/01", "/semestres/-1",
+      "/semestres/0", "/semestres/13", "/semestres/abc", "/semestres/1.0", "/semestres/01", "/semestres/-1",
       "/ramos/no-existe", "/ramos/demo-pending-calculo", "/ramos/demo-rejected-calculo",
       "/materiales/demo-pending-calculo", "/materiales/demo-rejected-calculo", "/materiales/no-existe",
     ]) await page(path, 404);

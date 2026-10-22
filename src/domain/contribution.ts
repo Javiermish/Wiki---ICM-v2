@@ -62,7 +62,7 @@ export function validateContributionDraft(draft: ContributionDraft, courses: rea
   const instructor = stringValue(draft.instructor);
   const version = stringValue(draft.version);
 
-  if (!courses.some((course) => course.id === courseId)) errors.courseId = "Elige un ramo existente.";
+  if (!courses.some((course) => course.id === courseId && course.status === "active")) errors.courseId = "Elige un ramo existente y activo.";
   if (!["listado", "apunte", "certamen"].includes(category)) errors.category = "Elige Listados, Apuntes o Certámenes.";
   if (academicYear === null) errors.academicYear = "Usa un año académico entero entre 1900 y 2100.";
   if (academicTerm === null) errors.academicTerm = "Elige el semestre académico 1 o 2, no el de malla.";

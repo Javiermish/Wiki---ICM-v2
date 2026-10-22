@@ -97,11 +97,13 @@ test("aportes: HTTP local, parámetros, navegación y regresiones", { skip: !bas
       ["/", 200, "Materiales para explorar"],
       ["/semestres/1", 200, "Cálculo I"],
       ["/semestres/4", 200, "Aún no hay ramos de ejemplo"],
+      ["/semestres/5", 200, "Aún no hay ramos de ejemplo"],
+      ["/semestres/13", 404],
       ["/ramos/calculo-i?tipo=certamenes&anio=2024&periodo=2&numero=2", 200, "Certamen 2 - 2024-2"],
       ["/ramos/geometria", 200, "Geometría"],
       ["/materiales/demo-certamen-calculo-2", 200, "Certamen 2 - 2024-2"],
       ["/materiales/demo-listado-algebra-1", 200, "Archivo no disponible"],
-      ["/moderacion", 404], ["/favoritos", 404], ["/ramos/no-existe", 404],
+      ["/moderacion", 404], ["/favoritos", 200, "Favoritos"], ["/ramos/no-existe", 404],
       ["/materiales/demo-pending-calculo", 404], ["/materiales/demo-rejected-calculo", 404],
     ]) {
       const html = await page(path, status);

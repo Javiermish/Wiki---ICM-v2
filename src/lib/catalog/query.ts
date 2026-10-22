@@ -55,7 +55,7 @@ export function catalogFacets(catalog: Catalog) {
   const materials = approvedMaterials(catalog);
   return {
     years: [...new Set(materials.map((material) => material.academicYear))].sort((a, b) => b - a),
-    curricularSemesters: [...new Set(materials.map((material) => material.course.curricularSemester))].sort((a, b) => a - b),
+    curricularSemesters: [...new Set(materials.flatMap((material) => material.course.curricularSemester === null ? [] : [material.course.curricularSemester]))].sort((a, b) => a - b),
     count: materials.length,
   };
 }
@@ -65,7 +65,7 @@ export function semesterCourses(catalog: Catalog, semester: number, query = ""):
   const words = normalizeSearch(query).split(/\s+/).filter(Boolean);
   return catalog.courses.filter((course) => {
     const text = normalizeSearch(`${course.name} ${course.code ?? ""}`);
-    return course.curricularSemester === semester && words.every((word) => text.includes(word));
+    return course.status === "active" && course.curricularSemester === semester && words.every((word) => text.includes(word));
   });
 }
 
@@ -87,4 +87,29 @@ export function courseFacets(catalog: Catalog, courseId: string, category?: Cata
 /** Todo futuro acceso público por ID debe atravesar la misma proyección. */
 export function publicMaterialById(catalog: Catalog, id: string): PublicMaterial | undefined {
   return approvedMaterials(catalog).find((material) => material.id === id);
+}
+
+/** Incluye ramos sin documentos. Archivar retira selectores, no borra materiales. */
+export function searchCourses(catalog: Catalog, filters: { q?: string; curricularSemester?: number; electiveAreaId?: string; includeArchived?: boolean } = {}): Course[] {
+  const words = normalizeSearch(filters.q ?? "").split(/\s+/).filter(Boolean);
+  return catalog.courses.filter((course) => {
+    if (!filters.includeArchived && course.status !== "active") return false;
+    if (filters.curricularSemester !== undefined && course.curricularSemester !== filters.curricularSemester) return false;
+    if (filters.electiveAreaId !== undefined && course.electiveAreaId !== filters.electiveAreaId) return false;
+    const area = catalog.electiveAreas.find((entry) => entry.id === course.electiveAreaId);
+    const text = normalizeSearch(`${course.name} ${course.code ?? ""} ${course.description ?? ""} ${area?.name ?? ""}`);
+    return words.every((word) => text.includes(word));
+  });
+}
+
+export function catalogSemesters(catalog: Catalog): number[] {
+  return [...new Set([1, 2, 3, 4, ...catalog.courses.flatMap((course) => course.kind === "regular" && course.status === "active" ? [course.curricularSemester] : [])])].sort((a, b) => a - b);
+}
+
+export function courseClassification(course: Course, areas: Catalog["electiveAreas"]): string {
+  return course.kind === "regular" ? `Semestre curricular ${course.curricularSemester}` : `Electivo · ${areas.find((area) => area.id === course.electiveAreaId)?.name ?? "Área no disponible"}`;
+}
+
+export function courseParentBreadcrumb(course: Course, areas: Catalog["electiveAreas"]) {
+  return { label: courseClassification(course, areas), href: course.kind === "regular" ? `/semestres/${course.curricularSemester}` : `/electivos?area=${encodeURIComponent(course.electiveAreaId)}` };
 }

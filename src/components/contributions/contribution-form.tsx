@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import type { Course } from "@/domain/catalog";
+import { useCourseCatalog } from "@/components/catalog/course-catalog-provider";
+import { courseClassification, searchCourses } from "@/lib/catalog/query";
 import { checkContributionFile, contributionDisplayName, contributionDownloadName, createContributionDraft, validateContributionDraft, type ContributionDraft } from "@/domain/contribution";
 import { fileFormats, hasExpectedSignature } from "@/lib/materials/file-metadata";
 import { Button } from "@/components/ui/button";
@@ -16,11 +17,14 @@ type FormErrors = Partial<Record<keyof ContributionDraft | "file" | "authorizati
 type SelectedFile = { file: File; kind: "pdf" | "image"; revision: number };
 const SUCCESS_MESSAGE = "Simulación completada. Ningún archivo fue enviado. El sistema de aportes estará disponible cuando se active la autenticación y el almacenamiento.";
 
-export function ContributionForm({ courses, initialCourseId = "", invalidCourseLink = false }: {
-  courses: readonly Course[];
-  initialCourseId?: string;
+export function ContributionForm({ courseSlug, invalidCourseLink = false }: {
+  courseSlug?: string;
   invalidCourseLink?: boolean;
 }) {
+  const { catalog } = useCourseCatalog();
+  const courses = searchCourses(catalog);
+  const initialCourseId = courses.find((course) => course.slug === courseSlug)?.id ?? "";
+  const invalidSelectionLink = invalidCourseLink || (courseSlug !== undefined && !initialCourseId);
   const [draft, setDraft] = useState<ContributionDraft>(() => ({ ...createContributionDraft(), courseId: initialCourseId }));
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const [fileError, setFileError] = useState<string>();
@@ -43,7 +47,7 @@ export function ContributionForm({ courses, initialCourseId = "", invalidCourseL
     setPreviewStatus(status);
     if (status === "error") { setKnownFileError(true); setCompleted(false); }
     if (status === "ready") setErrors((current) => ({ ...current, file: undefined }));
-  }, [previewRevision]);
+  }, [previewRevision, setCompleted, setErrors]);
 
   useEffect(() => {
     let active = true;
@@ -155,7 +159,7 @@ export function ContributionForm({ courses, initialCourseId = "", invalidCourseL
     </div> : null}
 
     <ContributionSection number={1} title="Elige el ramo" description="Ubica el material en su ramo, sin cambiar su semestre curricular.">
-      {invalidCourseLink ? <p role="status" className="mb-4 rounded-lg bg-muted p-3 text-sm">El enlace no identifica un único ramo de demostración. Selecciona uno para continuar.</p> : null}
+      {invalidSelectionLink ? <p role="status" className="mb-4 rounded-lg bg-muted p-3 text-sm">El enlace no identifica un único ramo activo de demostración. Selecciona uno para continuar.</p> : null}
       <ContributionCoursePicker courses={courses} value={draft.courseId} onChange={(value) => updateField("courseId", value)} error={errors.courseId} />
     </ContributionSection>
 
@@ -184,7 +188,7 @@ export function ContributionForm({ courses, initialCourseId = "", invalidCourseL
     </ContributionSection>
 
     <ContributionSection number={4} title="Revisa y simula el aporte" description="Esta demostración no crea un envío, un estado pendiente ni una publicación.">
-      <div className="rounded-lg bg-muted p-4 sm:p-5"><Badge>Resumen local</Badge><h3 className="mt-3 text-lg font-semibold">{displayName ?? "Nombre pendiente de completar"}</h3><dl className="mt-3 space-y-2 text-sm [overflow-wrap:anywhere]"><div><dt className="font-medium">Ramo</dt><dd>{selectedCourse?.name ?? "Sin seleccionar"}</dd></div><div><dt className="font-medium">Semestre curricular</dt><dd>{selectedCourse?.curricularSemester ?? "Sin seleccionar"} · depende del ramo</dd></div><div><dt className="font-medium">Período académico</dt><dd>{validation.ok ? `${validation.value.academicYear}-${validation.value.academicTerm}` : "Por completar"}</dd></div>{draft.title.trim() ? <div><dt className="font-medium">Título descriptivo</dt><dd className="break-words">{draft.title}</dd></div> : null}{draft.section.trim() ? <div><dt className="font-medium">Sección</dt><dd>{draft.section}</dd></div> : null}{draft.instructor.trim() ? <div><dt className="font-medium">Profesor o profesora</dt><dd>{draft.instructor}</dd></div> : null}{draft.version.trim() ? <div><dt className="font-medium">Versión</dt><dd>{draft.version}</dd></div> : null}<div><dt className="font-medium">Archivo local</dt><dd>{selectedFile ? `${selectedFile.kind === "pdf" ? "PDF" : "Imagen"} · ${(selectedFile.file.size / (1024 * 1024)).toLocaleString("es-CL", { maximumFractionDigits: 2 })} MiB` : "Sin seleccionar"}</dd></div></dl></div>
+      <div className="rounded-lg bg-muted p-4 sm:p-5"><Badge>Resumen local</Badge><h3 className="mt-3 text-lg font-semibold">{displayName ?? "Nombre pendiente de completar"}</h3><dl className="mt-3 space-y-2 text-sm [overflow-wrap:anywhere]"><div><dt className="font-medium">Ramo</dt><dd>{selectedCourse?.name ?? "Sin seleccionar"}</dd></div><div><dt className="font-medium">Ubicación curricular</dt><dd>{selectedCourse ? courseClassification(selectedCourse, catalog.electiveAreas) : "Sin seleccionar"}</dd></div><div><dt className="font-medium">Período académico</dt><dd>{validation.ok ? `${validation.value.academicYear}-${validation.value.academicTerm}` : "Por completar"}</dd></div>{draft.title.trim() ? <div><dt className="font-medium">Título descriptivo</dt><dd className="break-words">{draft.title}</dd></div> : null}{draft.section.trim() ? <div><dt className="font-medium">Sección</dt><dd>{draft.section}</dd></div> : null}{draft.instructor.trim() ? <div><dt className="font-medium">Profesor o profesora</dt><dd>{draft.instructor}</dd></div> : null}{draft.version.trim() ? <div><dt className="font-medium">Versión</dt><dd>{draft.version}</dd></div> : null}<div><dt className="font-medium">Archivo local</dt><dd>{selectedFile ? `${selectedFile.kind === "pdf" ? "PDF" : "Imagen"} · ${(selectedFile.file.size / (1024 * 1024)).toLocaleString("es-CL", { maximumFractionDigits: 2 })} MiB` : "Sin seleccionar"}</dd></div></dl></div>
       <p className="mt-5 text-sm text-muted-foreground">Cuando se active el sistema real, necesitarás una cuenta con correo verificado para aportar. Cada aporte requerirá revisión humana antes de ser público; no habrá acceso público a materiales pendientes o rechazados.</p>
       <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-border p-4" htmlFor="contribution-authorization"><input id="contribution-authorization" form="contribution-form" name="authorization" type="checkbox" checked={authorized} onChange={(event) => { setAuthorized(event.target.checked); setErrors((current) => ({ ...current, authorization: undefined })); setCompleted(false); }} aria-invalid={Boolean(errors.authorization)} aria-describedby={errors.authorization ? "contribution-authorization-error" : undefined} className="mt-1 size-5 shrink-0 accent-primary" /><span className="text-sm">Confirmo que soy autor/a o tengo autorización para compartir este material, y que no contiene datos personales que no deba divulgar. <span className="font-medium">(Obligatorio para la simulación)</span></span></label>
       {errors.authorization ? <p id="contribution-authorization-error" className="mt-2 text-sm font-medium text-destructive">{errors.authorization}</p> : null}

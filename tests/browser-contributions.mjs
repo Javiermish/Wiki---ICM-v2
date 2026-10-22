@@ -32,6 +32,7 @@ let base, executable, profile, chrome, socket, rpc, session, currentDocument;
 let injecting = false;
 let interceptionError;
 let holdScripts = false;
+let pendingFixtureURLCount = null;
 const heldScripts = [];
 
 async function launch() {
@@ -176,7 +177,17 @@ async function fixture(filename) {
   const { root: document } = await call('DOM.getDocument');
   const { nodeId } = await call('DOM.querySelector', { nodeId: document.nodeId, selector: fileInput });
   assert.ok(nodeId, 'real local file input');
+  pendingFixtureURLCount = fileURLs().length;
   await call('DOM.setFileInputFiles', { nodeId, files: [absolute] });
+}
+
+async function selectedFixtureReady() {
+  if (pendingFixtureURLCount === null) return;
+  const previous = pendingFixtureURLCount;
+  const deadline = Date.now() + 15000;
+  while (fileURLs().length <= previous && Date.now() < deadline) await sleep(30);
+  assert.ok(fileURLs().length > previous, 'A new selection allocated its own real preview URL');
+  pendingFixtureURLCount = null;
 }
 async function syntheticFile({ name, type, bytes = 100, content, drop = false, multiple = false }) {
   await evaluate(`(() => {
@@ -188,11 +199,13 @@ async function syntheticFile({ name, type, bytes = 100, content, drop = false, m
   })()`);
 }
 async function pdfReady(page = 1) {
+  await selectedFixtureReady();
   await wait(`document.querySelector(${text(pageOutput)})?.textContent===${text(`Página ${page} de 3`)} && document.querySelector(${text(`${reader} canvas`)})?.width>0 && !!document.querySelector(${text(`${reader} .textLayer span`)}) && !document.querySelector(${text(`${reader} [aria-busy="true"]`)})`, `real local PDF page ${page}`, 25000);
   assert.equal(await evaluate(`document.querySelectorAll(${text(`${reader} canvas`)}).length`), 1);
   assert.equal(await evaluate(`document.querySelector(${text(`${reader} .react-pdf__Page`)})?.getAttribute('data-page-number')`), String(page));
 }
 async function imageReady() {
+  await selectedFixtureReady();
   await wait(`(() => {const r=document.querySelector(${text(reader)}),i=r?.querySelector('img');return i?.complete&&i.naturalWidth>0&&i.closest('[aria-busy]')?.getAttribute('aria-busy')==='false'&&!r.querySelector('[role="alert"],[aria-busy="true"]')&&!/Cargando imagen/.test(r.textContent);})()`, 'real decoded local image, settled loading state');
 }
 async function snapshot(name) {
@@ -266,7 +279,8 @@ try {
   for (const candidate of candidates) { try { await access(candidate, constants.X_OK); executable = candidate; break; } catch {} }
   assert.ok(executable, 'No executable Chrome found. Set WIKI_CHROME_PATH; no browser is installed by this runner');
   report.executable = executable;
-  profile = await mkdtemp(resolve(artifacts, 'chromium-profile-'));
+  // Linux limita la ruta del socket Unix de Chromium; mantener el perfil corto.
+  profile = await mkdtemp(resolve(root, '.next/qac-'));
   const wsURL = await launch(); // One sandboxed attempt only; failures are BLOCKED below.
   socket = new WebSocket(wsURL);
   await new Promise((resolve,reject) => { socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true}); });
@@ -303,7 +317,12 @@ try {
           report.preventedRequests.push({url:event.request.url,method:event.request.method});
           await call('Fetch.failRequest',{requestId:event.requestId,errorReason:'BlockedByClient'});
         }
-      } catch(error){interceptionError=error.message;}
+      } catch(error){
+        // A document navigation can cancel an already-paused request before CDP
+        // continues it. This transport cancellation is not an application fault.
+        if (/Invalid InterceptionId/.test(error.message)) report.warnings.push({ type: 'cdp-cancelled-request', text: error.message });
+        else interceptionError=error.message;
+      }
     })();
   });
   for(const method of ['Page.enable','Runtime.enable','Network.enable','Log.enable'])await call(method);
@@ -326,6 +345,7 @@ try {
 
   await check('Course keyboard search by name/code, native radio arrows and no results', async()=>{
     await navigate('/aportar');
+    const initialCourseCount = await evaluate(`document.querySelectorAll('input[name="courseId"]').length`);
     assert.equal(await evaluate(`document.querySelectorAll('input[name="courseId"]:checked').length`),0);
     await fill('#contribution-course-search','calculo');
     await wait(`document.querySelectorAll('input[name="courseId"]').length===1`,'accent-insensitive course filtering');
@@ -342,7 +362,7 @@ try {
     assert.equal(await evaluate(`document.querySelector('#contribution-section-4').closest('section').querySelector('dd').textContent`),'Cálculo I','Hidden selected radio does not erase draft selection');
     await snapshot('course-no-results');
     await button('Limpiar búsqueda');
-    await wait(`document.querySelectorAll('input[name="courseId"]').length===6`);
+    await wait(`document.querySelectorAll('input[name="courseId"]').length===${initialCourseCount}`);
     await focus(courseRadio); await press('ArrowRight');
     await wait(`document.querySelector('input[name="courseId"]:checked')?.value==='demo-algebra-i'`,'native radio arrow selection');
     await press('ArrowLeft');

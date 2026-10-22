@@ -1,4 +1,4 @@
-# Wiki ICM — Hito 1.4
+# Wiki ICM — Hito 1.4.1 (ampliación local de Hito 1.4)
 
 Catálogo navegable de una biblioteca colaborativa de Ingeniería Civil Matemática.
 **Prototipo con datos ficticios: los ramos no representan la malla oficial de la UdeC.**
@@ -47,13 +47,19 @@ Capturas e informes locales en `.next/qa-evidence/`, `.next/qa-materials-evidenc
 y `.next/qa-contributions-evidence/` (ignorados por Git). Los runners de aportes y
 visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 
-## Funcionalidades listas
+## Funcionalidades del alcance vigente
 
 - `/`: portada del Hito 1.1, encabezado, navegación móvil, pie y aviso
   explícito de prototipo. Sus accesos ahora abren semestres y ramos.
 - `/semestres/[semestre]`: ramos del semestre curricular, buscador local por nombre
-  o código, navegación entre semestres y estados vacíos. Solo semestres de ejemplo
-  declarados en los fixtures; los demás devuelven 404.
+  o código, navegación entre semestres y estados vacíos. Admite enteros canónicos
+  1–12 para ramos creados en la demo; fuera de ese rango/formato devuelve 404.
+- `/electivos?area=numerico`: electivos por Numérico, Discreta, Optimización,
+  Estadística y Otro; búsqueda por nombre/código, áreas vacías y parámetros en URL.
+- `/gestion/asignaturas`: consulta, creación, edición, reclasificación, archivo y
+  reapertura **DEMO pública sin login**. Identidad/ruta estables; no elimina documentos.
+- `/favoritos`: selección DEMO local de materiales aprobados, con añadir/quitar;
+  no es un guardado en una cuenta ni una autenticación simulada.
 - `/ramos/[slug]`: ficha del ramo, breadcrumbs, Listados, Apuntes y Certámenes;
   filtros combinables por año, semestre académico y número, conservados en URL.
 - Múltiples secciones/versiones del mismo documento con identificadores únicos;
@@ -66,6 +72,7 @@ visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 - Filtros por semestre curricular, categoría, año, semestre académico y número,
   conservados en URL. Estados sin resultados y de parámetros inválidos.
 - Catálogo tipado `Course → CourseOffering → Material`, separado de UI y fixtures.
+  Regulares con semestre curricular y electivos por área sin semestre obligatorio.
   Pruebas para Cálculo I (curricular 1) y **Certamen 2 - 2024-2**.
 - Breadcrumbs en resultados, enlace de salto, etiquetas, foco visible y estado
   de carga accesible para el renderizado progresivo de Next.js.
@@ -93,6 +100,11 @@ visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 /semestres/1
 /semestres/1?q=DEMO-C1
 /semestres/4
+/electivos
+/electivos?area=numerico
+/electivos?area=optimizacion
+/gestion/asignaturas
+/favoritos
 /ramos/calculo-i
 /ramos/calculo-i?tipo=certamenes&anio=2024&periodo=2&numero=2
 /ramos/geometria?tipo=apuntes
@@ -108,7 +120,15 @@ visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 La tercera URL encuentra dos versiones del material sin cambiar el semestre curricular
 del ramo. La cuarta y quinta muestran el estado vacío. `/?term=7` muestra una
 advertencia, sin devolver silenciosamente todo el catálogo. Geometría ilustra un
-ramo sin materiales; el semestre 4 tampoco tiene ramos de ejemplo.
+ramo sin materiales; el semestre 4 tampoco tiene ramos en la semilla inicial.
+
+Gestión y favoritos comparten memoria durante la navegación cliente con `Next Link`/
+`Next Form`; recargar/cerrar u otra pestaña descarta los cambios. No hay persistencia
+de catálogo/favoritos en almacenamiento web ni servidor. Editar o reclasificar mantiene
+IDs/slugs y documentos; archivar retira selectores activos, **no despublica materiales
+aprobados**. Los nuevos ramos usan `/ramos/local-<uuid>`. El servidor entrega un shell
+HTTP 200 para ese prefijo válido incluso si no existe en la memoria cliente; muestra
+ausencia explícita, no una ficha inventada. Slugs normales desconocidos mantienen 404.
 
 En las rutas de ramo se usan `tipo=listados|apuntes|certamenes`, `anio`, `periodo`
 y `numero`. Se reutilizan las validaciones académicas de la portada, cuyo contrato
@@ -120,14 +140,16 @@ o repetidos muestran errores y no devuelven materiales. Sin `tipo` se abre Lista
 ```text
 src/app/                 Layout, catálogo, fichas públicas y endpoint de archivos
 src/components/catalog/  Buscador, semestres, fichas y carga
+                         Provider de catálogo DEMO y exploración de electivos
+src/components/courses/  Gestión pública DEMO de asignaturas
 src/components/layout/   Navegación compartida, breadcrumbs y avisos
 src/components/theme/    Control de tema (cliente)
 src/components/materials/ Lectores interactivos, toolbar y reporte simulado
 src/components/contributions/ Formulario y preview local, sin persistencia
 src/components/ui/       Primitivas reutilizables, incluido Button existente
-src/domain/              Tipos del catálogo
+src/domain/              Tipos del catálogo, validación y puertos asíncronos futuros
 src/fixtures/            Ejemplos explícitamente ficticios
-src/lib/catalog/         Consulta, proyección pública y contrato de filtros URL
+src/lib/catalog/         Consulta, allowlist pública, repositorio DEMO y filtros URL
 src/lib/materials/       Fuente de archivos solo servidor, nombres y navegación
 src/lib/theme.ts         Preferencia y script inicial del tema
 public/demo/             Muestras originales intencionalmente públicas
@@ -135,20 +157,33 @@ scripts/                 Preparación PDF.js y generación opcional de muestras
 tests/                   node:test y navegador Chromium vía CDP
 ```
 
-Hay preparación local de aportes, pero no pantallas de moderación ni favoritos; no hay
-Supabase, autenticación, subida ni publicación reales. Los reportes son una simulación sin backend. Las
-funciones futuras se señalan como **Próximamente**, no como acciones activas.
+Hay aportes preparados localmente, electivos, gestión y favoritos DEMO; no hay
+moderación, Supabase, autenticación, DB, Storage, subida ni publicación reales.
+La gestión abierta no tiene permisos efectivos ni representa una administración segura.
+Solicitudes de creación/revisión solo tienen contratos futuros, sin envío ni cola real.
+Los reportes son una simulación sin backend. Las funciones futuras se señalan como
+**Próximamente**, no como acciones activas.
 El filtrado de fixtures no sustituye permisos de servidor/RLS en hitos futuros.
 El prototipo incluye metadata `noindex`. Los fixtures incluyen casos pendientes y
 rechazados para comprobar su exclusión de la proyección pública, incluidas facetas
-y acceso por ID. No se envían nombres originales al cliente.
+y acceso por ID. El layout serializa únicamente `PublicCatalog` mediante
+`getPublicDemoCatalog()`/`toPublicCatalog`: materiales aprobados por allowlist, sin
+nombres originales ni fechas de subida y sin ofertas exclusivas de filas privadas.
+Fixtures privados permanecen del lado servidor. El repositorio local usa snapshots
+inmutables; el provider expone mutaciones asíncronas esperadas por la UI. Los futuros
+handlers de servidor y gateway cliente podrán sustituirlo sin importar Supabase ni
+claves privilegiadas desde los componentes.
 
 El kit original y su mockup estático se conservan en `README_HITO1.md` y
 `prototype/`; no son la aplicación implementada. Criterios y pruebas manuales:
 [`docs/HITO_1_1.md`](docs/HITO_1_1.md) (histórico) y
 [`docs/HITO_1_2.md`](docs/HITO_1_2.md) (catálogo) y
 [`docs/HITO_1_3.md`](docs/HITO_1_3.md) (lector, seguridad, pruebas y límites) y
-[`docs/HITO_1_4.md`](docs/HITO_1_4.md) (aportes locales y contratos futuros).
+[`docs/HITO_1_4.md`](docs/HITO_1_4.md) (aportes locales y contratos futuros, histórico) y
+[`docs/HITO_1_4_1.md`](docs/HITO_1_4_1.md) (alcance vigente: electivos, gestión,
+favoritos DEMO, integración, límites y verificaciones **pendientes de completar**).
+Restricciones/consultas DB recomendadas y revisión transaccional futura en
+[`docs/MODELO_DOMINIO.md`](docs/MODELO_DOMINIO.md); son diseño, no migraciones aplicadas.
 **Hito 1.5 no autorizado ni iniciado.**
 
 ## Dependencias del lector

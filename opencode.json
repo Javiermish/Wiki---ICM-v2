@@ -1,131 +1,14 @@
 
+
 {
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "build",
-
   "permissions": [
     {
-      "action": "shell",
+      "action": "*",
       "resource": "*",
-      "effect": "deny"
-    },
-
-    {
-      "action": "shell",
-      "resource": "git status *",
       "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "git diff *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "git log *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "git show *",
-      "effect": "allow"
-    },
-
-    {
-      "action": "shell",
-      "resource": "pnpm lint *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm build *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm test *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm dev *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm exec vitest *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm exec playwright *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm exec tsc *",
-      "effect": "allow"
-    },
-
-    {
-      "action": "shell",
-      "resource": "pnpm install *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "pnpm add *",
-      "effect": "allow"
-    },
-
-    {
-      "action": "external_directory",
-      "resource": "*",
-      "effect": "deny"
-    },
-
-    {
-      "action": "read",
-      "resource": "*.env",
-      "effect": "deny"
-    },
-    {
-      "action": "read",
-      "resource": "*.env.*",
-      "effect": "deny"
-    },
-    {
-      "action": "read",
-      "resource": "*.env.example",
-      "effect": "allow"
-    },
-
-    {
-      "action": "edit",
-      "resource": "*.env*",
-      "effect": "deny"
-    },
-    {
-      "action": "edit",
-      "resource": ".git/*",
-      "effect": "deny"
-    },
-    {
-      "action": "edit",
-      "resource": "opencode.json",
-      "effect": "deny"
     }
-  ],
-
-  "agents": {
-    "plan": {
-      "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        }
-      ]
-    }
-  }
+  ]
 }
+

@@ -14,7 +14,9 @@ Tipografía sans legible para UI; titulares claros y jerarquía 32-48/24/18/14 p
 4. `/materiales/[id]`: en Hito 1.3 autorizado, cabecera, breadcrumbs, lector PDF/imagen real y descarga de archivos originales de demostración; ficha sin archivo muestra disponibilidad explicativa, nunca un visor ficticio.
 5. `/aportar`: diseño de formulario con ramo, categoría, número, año, semestre académico, archivos y aviso de moderación.
 6. `/moderacion`: prototipo restringido simulado con cola de revisión; ruta real requerirá autorización servidor.
-7. `/favoritos`: lista guardada para cuenta; en Hito 1 simular para demo, dejar claro que el guardado real requiere login.
+7. `/favoritos`: en Hito 1.4.1, selección DEMO de materiales aprobados solo en memoria; añadir/quitar sin falsa sesión. El guardado real en cuenta requerirá login futuro.
+8. `/electivos`: exploración por área, búsqueda y estados vacíos; `?area=…` conserva la selección compartible.
+9. `/gestion/asignaturas`: gestión pública DEMO de ramos, sin permisos reales ni backend; consulta, creación, edición, reclasificación y archivo reversible.
 
 ## Cabecera
 Brand/logo, explorar, aportar, favoritos, búsqueda en portada y controles de tema/cuenta. Navegación móvil mediante menú accesible.
@@ -43,3 +45,15 @@ Capturas a 375, 768, 1280 y 1440px; modo claro/oscuro; keyboard tab; foco; contr
 - El lector se monta fuera del formulario de metadatos: la búsqueda PDF tiene su propio formulario. Se conserva paginación, zoom, ajuste, pantalla completa y colores originales del documento en ambos temas.
 - Resumen de errores enfocable y enlazado, errores por campo asociados, controles de 44 px y declaración de permiso sin marcar inicialmente.
 - Acción final explícitamente simulada; nunca mensajes de recepción, publicación ni pendientes reales. El formulario no persiste al recargar.
+
+## Electivos, gestión y favoritos Hito 1.4.1
+
+- Mantener la biblioteca como lenguaje principal, no convertir el sitio completo en un dashboard. Electivos distingue cinco áreas ilustrativas (Numérico, Discreta, Optimización, Estadística y Otro) con títulos, contador y vacío útil. Un electivo no se ubica artificialmente en un semestre de malla; su breadcrumb vuelve a `/electivos?area=…`.
+- Todas las fichas conservan las tres categorías, incluso con cero documentos; las categorías no se ocultan por ausencia de materiales.
+- Gestión muestra aviso persistente de **demo pública sin login**, datos ficticios y cambios que se pierden al recargar. Evitar insignias de administrador autenticado, candados que sugieran protección real o promesas de publicación. Solicitudes para usuarios registrados/revisión humana se explican como futuras, sin falso envío.
+- Formulario con nombre, código opcional, tipo, semestre curricular 1–12 solo para regulares, área existente solo para electivos y descripción opcional. ID y ruta son consultables, no editables. Mostrar duplicados exactos como errores y aproximados como avisos con los ramos coincidentes.
+- Consultar activos/archivados, confirmar archivo y permitir reabrir. Explicar que conserva enlaces y documentos; archivar un ramo no equivale a retirar un material aprobado. Reclasificación actualiza etiquetas/breadcrumbs sin regenerar URLs ni fechas académicas.
+- Mutaciones con `await`, estado ocupado, prevención de doble acción y errores recuperables; no mostrar éxito antes de resolver la operación. Resumen enfocable, errores asociados a controles visibles, foco tras confirmación/cancelación, etiquetas semánticas y objetivos de al menos 44 px. Sin JavaScript no hay mutaciones ni envío nativo de los metadatos.
+- Favoritos ofrece añadir/quitar sobre materiales aprobados, estado del control anunciado y lista vacía útil. Rotular siempre DEMO local: no exigir ni simular cuenta, y no confundirlo con favoritos persistentes de producto final.
+- El estado compartido se conserva al navegar con `Next Link`/`Next Form`; recargas y otras pestañas no lo conservan. El aviso aplica a gestión y favoritos, no a la preferencia independiente de tema. Las URLs locales `local-…` pueden abrir un shell HTTP 200 sin ramo tras recargar; mostrar una explicación y salida útil, no una ficha inventada ni afirmar que fue un 404 HTTP.
+- Validación prevista: 375/768/1280/1440 px, claro/oscuro, teclado, foco, largos sin espacios, vacíos y errores, reclasificación con documentos, favoritos y navegación entre pantallas. Resultados de esta ampliación pendientes en [HITO_1_4_1.md](HITO_1_4_1.md); la especificación no acredita pruebas realizadas.

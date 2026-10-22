@@ -5,9 +5,11 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const navigationLinks = [
   { href: "/#explorar", label: "Explorar" },
+  { href: "/electivos", label: "Electivos" },
   { href: "/#materiales", label: "Materiales" },
   { href: "/#comunidad", label: "Comunidad" },
   { href: "/aportar", label: "Aportar" },
+  { href: "/favoritos", label: "Favoritos · demo" },
 ] as const;
 
 export function SiteHeader() {
@@ -24,17 +26,17 @@ export function SiteHeader() {
           </span>
           <span className="text-lg sm:text-xl">Wiki ICM</span>
         </Link>
-        <div className="flex shrink-0 items-center gap-1 md:gap-5">
-          <nav aria-label="Navegación principal" className="hidden md:block">
-            <ul className="flex items-center gap-1 lg:gap-4">
+        <div className="flex shrink-0 items-center gap-1 lg:gap-3">
+          <nav aria-label="Navegación principal" className="hidden lg:block">
+            <ul className="flex items-center gap-1">
               {navigationLinks.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

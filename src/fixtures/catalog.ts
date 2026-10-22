@@ -1,16 +1,21 @@
 import type { Catalog } from "../domain/catalog";
+import { initialElectiveAreas } from "../domain/course-management.ts";
 
 /** Datos inventados. Ni códigos ni ubicaciones constituyen la malla UdeC. */
 export const demoSemesters = [1, 2, 3, 4] as const;
 
 export const demoCatalog: Catalog = {
+  electiveAreas: initialElectiveAreas,
   courses: [
-    { id: "demo-calculo-i", code: "DEMO-C1", slug: "calculo-i", name: "Cálculo I", curricularSemester: 1, curriculumId: "plan-ilustrativo" },
-    { id: "demo-algebra-i", code: "DEMO-A1", slug: "algebra-i", name: "Álgebra I", curricularSemester: 1, curriculumId: "plan-ilustrativo" },
-    { id: "demo-fisica-i", code: "DEMO-F1", slug: "fisica-i", name: "Física I", curricularSemester: 2, curriculumId: "plan-ilustrativo" },
-    { id: "demo-programacion", code: "DEMO-P1", slug: "programacion", name: "Programación", curricularSemester: 2, curriculumId: "plan-ilustrativo" },
-    { id: "demo-ecuaciones", code: "DEMO-ED", slug: "ecuaciones-diferenciales", name: "Ecuaciones Diferenciales", curricularSemester: 3, curriculumId: "plan-ilustrativo" },
-    { id: "demo-geometria", code: null, slug: "geometria", name: "Geometría", curricularSemester: 3, curriculumId: "plan-ilustrativo" },
+    { id: "demo-calculo-i", code: "DEMO-C1", slug: "calculo-i", name: "Cálculo I", kind: "regular", curricularSemester: 1, electiveAreaId: null, description: null, status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-algebra-i", code: "DEMO-A1", slug: "algebra-i", name: "Álgebra I", kind: "regular", curricularSemester: 1, electiveAreaId: null, description: null, status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-fisica-i", code: "DEMO-F1", slug: "fisica-i", name: "Física I", kind: "regular", curricularSemester: 2, electiveAreaId: null, description: null, status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-programacion", code: "DEMO-P1", slug: "programacion", name: "Programación", kind: "regular", curricularSemester: 2, electiveAreaId: null, description: null, status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-ecuaciones", code: "DEMO-ED", slug: "ecuaciones-diferenciales", name: "Ecuaciones Diferenciales", kind: "regular", curricularSemester: 3, electiveAreaId: null, description: null, status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-geometria", code: null, slug: "geometria", name: "Geometría", kind: "regular", curricularSemester: 3, electiveAreaId: null, description: null, status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-electivo-numerico", code: "DEMO-EN", slug: "electivo-numerico", name: "Taller de Simulación Numérica", kind: "elective", curricularSemester: null, electiveAreaId: "numerico", description: "Electivo ficticio para explorar métodos de simulación.", status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-electivo-discreta", code: null, slug: "electivo-discreta", name: "Grafos y Redes", kind: "elective", curricularSemester: null, electiveAreaId: "discreta", description: "Electivo ilustrativo; no representa una oferta académica oficial.", status: "active", curriculumId: "plan-ilustrativo" },
+    { id: "demo-electivo-estadistica", code: "DEMO-EE", slug: "electivo-estadistica", name: "Laboratorio de Datos", kind: "elective", curricularSemester: null, electiveAreaId: "estadistica", description: null, status: "active", curriculumId: "plan-ilustrativo" },
   ],
   offerings: [
     { id: "demo-calculo-2024-1", courseId: "demo-calculo-i", academicYear: 2024, academicTerm: 1 },

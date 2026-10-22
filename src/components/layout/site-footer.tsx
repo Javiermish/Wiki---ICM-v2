@@ -11,9 +11,11 @@ export function SiteFooter() {
         <div className="max-w-md text-sm text-muted-foreground sm:text-right">
           <nav aria-label="Pie de página" className="mb-3 flex flex-wrap gap-x-6 sm:justify-end">
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#explorar">Explorar ejemplos</Link>
+            <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/electivos">Electivos</Link>
+            <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/gestion/asignaturas">Gestionar ramos · demo pública</Link>
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#comunidad">Sobre el proyecto</Link>
           </nav>
-          <p>Prototipo · Hito 1.3. Archivos locales de demostración.</p>
+          <p>Prototipo · Hito 1.4.1. Archivos locales de demostración.</p>
           <p>No representa la malla oficial de la UdeC.</p>
         </div>
       </div>

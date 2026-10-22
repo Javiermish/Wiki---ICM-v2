@@ -1,4 +1,5 @@
 import { Search, SlidersHorizontal } from "lucide-react";
+import Form from "next/form";
 import { Button } from "@/components/ui/button";
 import type { CatalogFilters } from "@/domain/catalog";
 import { categoryLabels } from "@/lib/catalog/query";
@@ -6,7 +7,7 @@ import { categoryLabels } from "@/lib/catalog/query";
 export function SearchForm({ filters, years }: { filters: CatalogFilters; years: readonly number[] }) {
   const expanded = [filters.curricularSemester, filters.category, filters.year, filters.term, filters.number].some((value) => value !== undefined);
   return (
-    <form action="/#materiales" method="get" role="search" aria-label="Buscar en el catálogo de ejemplo" className="mt-8 max-w-3xl">
+    <Form action="/#materiales" role="search" aria-label="Buscar en el catálogo de ejemplo" className="mt-8 max-w-3xl">
       <label htmlFor="q" className="mb-2 block text-sm font-semibold">Busca un ramo o material</label>
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative min-w-0 flex-1">
@@ -47,6 +48,6 @@ export function SearchForm({ filters, years }: { filters: CatalogFilters; years:
         </div>
         <p className="mt-3 text-sm text-[var(--hero-muted)]">Los filtros se combinan al pulsar Buscar. El semestre curricular ubica el ramo; el período académico indica cuándo se dictó.</p>
       </details>
-    </form>
+    </Form>
   );
 }
