@@ -1,69 +1,90 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Suspense } from "react";
+import { BookOpen, HeartHandshake, ShieldCheck } from "lucide-react";
+import { SearchForm } from "@/components/catalog/search-form";
+import { CatalogLoading } from "@/components/catalog/catalog-loading";
+import { SemesterSection } from "@/components/catalog/semester-section";
+import { MaterialCard } from "@/components/catalog/material-card";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { demoCatalog, demoSemesters } from "@/fixtures/catalog";
+import { approvedMaterials, catalogFacets, searchCatalog } from "@/lib/catalog/query";
+import { hasCatalogFilters, parseCatalogFilters, type SearchParameters } from "@/lib/catalog/filters";
 
-export default function Home() {
+type HomeProps = { searchParams: Promise<SearchParameters> };
+
+export default function Home(props: HomeProps) {
+  return <Suspense fallback={<CatalogLoading />}><HomeContent {...props} /></Suspense>;
+}
+
+async function HomeContent({ searchParams }: HomeProps) {
+  const { filters, errors } = parseCatalogFilters(await searchParams);
+  const searching = hasCatalogFilters(filters) || errors.length > 0;
+  const materials = errors.length ? [] : searchCatalog(demoCatalog, filters);
+  const facets = catalogFacets(demoCatalog);
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main id="contenido" tabIndex={-1} className="page-container flex-1 pt-6 pb-12 sm:pt-8 sm:pb-16">
+      <section aria-labelledby="home-heading" className="hero-panel">
+        <div className="grid gap-8 lg:grid-cols-[1fr_15rem] lg:gap-12">
+          <div>
+            <p className="mb-4 text-sm text-[var(--hero-muted)]">Biblioteca colaborativa de Ingeniería Civil Matemática</p>
+            <h1 id="home-heading" className="max-w-2xl text-[2rem] leading-[1.12] font-semibold tracking-tight sm:text-5xl">Encuentra material para seguir aprendiendo.</h1>
+            <p className="mt-5 max-w-xl text-base text-[var(--hero-muted)]">Apuntes, listados y certámenes, reunidos en un mismo lugar. Para repasar una idea, practicar un poco más y compartir lo aprendido.</p>
+          </div>
+          <dl className="hidden space-y-4 border-l border-[var(--hero-rule)] pl-6 lg:block">
+            <div><dt className="font-semibold">Listados</dt><dd className="text-sm text-[var(--hero-muted)]">Practica a tu ritmo.</dd></div>
+            <div><dt className="font-semibold">Apuntes</dt><dd className="text-sm text-[var(--hero-muted)]">Vuelve a las ideas clave.</dd></div>
+            <div><dt className="font-semibold">Certámenes</dt><dd className="text-sm text-[var(--hero-muted)]">Prepara tu próxima evaluación.</dd></div>
+          </dl>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <SearchForm filters={filters} years={facets.years} />
+      </section>
+
+      <SemesterSection semesters={demoSemesters} materials={approvedMaterials(demoCatalog)} filters={filters} />
+
+      <section id="materiales" aria-labelledby="materials-heading" className="section-spacing border-t border-border">
+        {searching ? <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Resultados" }]} /> : null}
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-2xl">
+            <h2 id="materials-heading" className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">{searching ? "Resultados de tu búsqueda" : "Materiales para explorar"}</h2>
+            <p className="mt-2 text-muted-foreground">{filters.q ? <>Consulta: «{filters.q}». </> : null}Ejemplos aprobados en el catálogo ficticio. El visor y la descarga estarán disponibles más adelante.</p>
+          </div>
+          {searching ? <Link className="text-link inline-flex min-h-11 items-center rounded text-sm font-semibold" href="/#materiales">Restablecer búsqueda</Link> : <Badge>Catálogo de demostración</Badge>}
         </div>
-      </main>
-    </div>
+        {errors.length ? (
+          <div role="alert" className="rounded-xl border border-destructive bg-card p-6">
+            <h3 className="font-semibold text-destructive">Revisa los criterios de búsqueda</h3>
+            <ul className="mt-2 list-inside list-disc text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul>
+            <p className="mt-3 text-sm text-muted-foreground">No se muestran resultados con criterios inválidos. Corrige el formulario o restablece la búsqueda.</p>
+          </div>
+        ) : (
+          <>
+            <p role="status" aria-live="polite" aria-atomic="true" className="mb-4 text-sm text-muted-foreground">{materials.length} {materials.length === 1 ? "material ficticio encontrado" : "materiales ficticios encontrados"}.</p>
+            {materials.length ? <ul className="space-y-3">{materials.map((material) => <li key={material.id}><MaterialCard material={material} /></li>)}</ul> : (
+              <EmptyState title="No encontramos materiales de ejemplo">
+                <p>Prueba con otro ramo o combina menos filtros. Que no haya ejemplos no significa que el ramo no exista en la malla.</p>
+                <Link href="/#materiales" className="text-link mt-3 inline-flex min-h-11 items-center rounded font-semibold">Limpiar búsqueda y filtros</Link>
+              </EmptyState>
+            )}
+          </>
+        )}
+      </section>
+
+      <section id="comunidad" aria-labelledby="community-heading" className="section-spacing border-t border-border">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-16">
+          <div>
+            <HeartHandshake className="mb-4 size-8 text-primary" aria-hidden="true" />
+            <h2 id="community-heading" className="max-w-md text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Lo que aprendes puede ayudar a alguien más.</h2>
+            <p className="mt-4 max-w-lg text-muted-foreground">Wiki ICM nace como una biblioteca hecha entre estudiantes. Queremos que encontrar material sea sencillo y que el conocimiento siga circulando.</p>
+          </div>
+          <div className="space-y-6 lg:pt-2">
+            <div className="flex gap-4"><BookOpen className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Lectura abierta, sin registro</h3><p className="mt-1 text-sm text-muted-foreground">El material aprobado será público. Esta portada usa únicamente ejemplos ficticios.</p></div></div>
+            <div className="flex gap-4"><ShieldCheck className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Compartir con cuidado</h3><p className="mt-1 text-sm text-muted-foreground">Cada aporte pasará por revisión humana antes de publicarse. Solo se aceptará material autorizado.</p></div></div>
+            <p className="rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><strong className="text-foreground">Aportar, guardar favoritos y reportar: próximamente.</strong> No hay registro, subidas ni publicaciones reales en este prototipo.</p>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
