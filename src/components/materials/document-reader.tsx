@@ -11,18 +11,23 @@ const PdfReader = dynamic(() => import("./pdf-reader"), {
   loading: () => <p role="status" className="rounded-xl border border-border bg-card p-8">Preparando lector PDF…</p>,
 });
 
-export type DocumentReaderProps = { file: PublicMaterialFile; title: string };
+/** Reading does not imply publication: local blob previews need no download URL. */
+export type ReaderFile = Pick<PublicMaterialFile, "kind" | "url">;
+export type ReaderStatus = "loading" | "ready" | "error";
+export type DocumentReaderProps = { file: ReaderFile; title: string; onStatusChange?: (status: ReaderStatus) => void };
 
-class ReaderBoundary extends Component<{ children: ReactNode; retry: () => void }, { failed: boolean }> {
+class ReaderBoundary extends Component<{ children: ReactNode; retry: () => void; onStatusChange?: (status: ReaderStatus) => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch() { this.props.onStatusChange?.("error"); }
   render() { return this.state.failed ? <ReaderFailure retry={this.props.retry} /> : this.props.children; }
 }
 
-function ImageReader({ file, title }: DocumentReaderProps) {
+function ImageReader({ file, title, onStatusChange }: DocumentReaderProps) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [attempt, setAttempt] = useState(0);
   const image = useRef<HTMLImageElement>(null);
+  useEffect(() => { onStatusChange?.(status); }, [status, onStatusChange]);
   useEffect(() => {
     let active = true;
     const element = image.current;
@@ -41,9 +46,9 @@ function ImageReader({ file, title }: DocumentReaderProps) {
   </div>}</ReaderFrame>;
 }
 
-export function DocumentReader({ file, title }: DocumentReaderProps) {
+export function DocumentReader({ file, title, onStatusChange }: DocumentReaderProps) {
   const [attempt, setAttempt] = useState(0);
-  return <ReaderBoundary key={`${file.url}:${attempt}`} retry={() => setAttempt((value) => value + 1)}>
-    {file.kind === "pdf" ? <PdfReader file={file} title={title} /> : <ImageReader file={file} title={title} />}
+  return <ReaderBoundary key={`${file.url}:${attempt}`} retry={() => setAttempt((value) => value + 1)} onStatusChange={onStatusChange}>
+    {file.kind === "pdf" ? <PdfReader file={file} title={title} onStatusChange={onStatusChange} /> : <ImageReader file={file} title={title} onStatusChange={onStatusChange} />}
   </ReaderBoundary>;
 }

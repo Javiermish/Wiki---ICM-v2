@@ -34,7 +34,8 @@ test("rutas y HTML del prototipo", { skip: !base }, async (t) => {
         assert.ok(html.includes(`for="${name}"`));
       }
       assert.ok(!html.includes("archivo-ejemplo.pdf"), "sin nombres originales en HTML público");
-      for (const route of ["/aportar", "/moderacion", "/favoritos"]) {
+      assert.ok(html.includes('href="/aportar"'), "acceso al formulario local autorizado en Hito 1.4");
+      for (const route of ["/moderacion", "/favoritos"]) {
         assert.ok(!html.includes(`href="${route}`), `no hay enlaces a ${route}`);
       }
       if (count > 0 && path.includes("2024")) {
@@ -43,7 +44,7 @@ test("rutas y HTML del prototipo", { skip: !base }, async (t) => {
     });
   }
   await t.test("fuera de alcance sigue siendo 404", async () => {
-    for (const path of ["/aportar", "/moderacion", "/favoritos"]) {
+    for (const path of ["/moderacion", "/favoritos"]) {
       assert.equal((await fetch(new URL(path, base))).status, 404, path);
     }
   });

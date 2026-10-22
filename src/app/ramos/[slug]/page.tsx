@@ -41,6 +41,7 @@ async function CourseContent({ params, searchParams }: CourseProps) {
       <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{course.name}</h1>
       <p className="mt-3 font-medium">Semestre curricular {course.curricularSemester}</p>
       <p className="mt-2 max-w-2xl text-muted-foreground">Ramo y materiales ficticios: no representan la malla oficial de la UdeC. El período académico de cada documento es independiente del semestre curricular.</p>
+      <Link href={`/aportar?ramo=${encodeURIComponent(course.slug)}`} className="text-link mt-3 inline-flex min-h-11 items-center rounded text-sm font-semibold">Preparar un aporte para este ramo · demo local</Link>
       <CourseFilters slug={course.slug} filters={filters} years={facets.years} numbers={facets.numbers} />
       <section aria-labelledby="course-materials-heading">
         <h2 id="course-materials-heading" className="mb-3 text-2xl font-semibold tracking-tight">{categoryLabels[category]}</h2>

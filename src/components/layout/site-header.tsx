@@ -7,6 +7,7 @@ const navigationLinks = [
   { href: "/#explorar", label: "Explorar" },
   { href: "/#materiales", label: "Materiales" },
   { href: "/#comunidad", label: "Comunidad" },
+  { href: "/aportar", label: "Aportar" },
 ] as const;
 
 export function SiteHeader() {

@@ -25,5 +25,7 @@ Autenticación real, base de datos real, upload real, visor PDF real, moderació
 
 **Ampliación autorizada en Hito 1.3:** lectura PDF e imágenes y descarga reales, exclusivamente con archivos locales originales de demostración. Reportes explícitamente simulados. No se habilitan servicios de autenticación, DB, Storage, subidas, moderación ni despliegue. El Hito 1.4 requiere aprobación independiente.
 
+**Ampliación autorizada en Hito 1.4:** formulario `/aportar` completo, con metadatos estructurados, selección de un archivo local PDF/JPEG/PNG/WebP de hasta 25 MiB y previsualización con el lector existente. Solo estado en memoria y confirmación explícita de simulación; ningún archivo se envía, persiste, publica ni ingresa a moderación. La ampliación no autoriza Hito 1.5 ni servicios reales.
+
 ## Restricciones
 No afirmar que los ramos de ejemplo conforman la malla oficial. No almacenar ni publicar documentos de terceros sin permiso. Moderación y políticas de acceso deben estar del lado del servidor en versión funcional.

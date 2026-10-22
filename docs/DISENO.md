@@ -34,3 +34,12 @@ Capturas a 375, 768, 1280 y 1440px; modo claro/oscuro; keyboard tab; foco; contr
 - Búsqueda de texto real cuando el PDF lo contiene; sin prometer OCR. No invertir colores del documento en tema oscuro.
 - Navegación desde tarjeta a ficha con filtros del ramo conservados; breadcrumbs distinguen semestre curricular de período académico.
 - Diálogo de reporte etiquetado como demostración, sin envíos ni persistencia reales.
+
+## Aportes Hito 1.4
+- `/aportar`: una página guiada, columna legible sin sidebar permanente; cuatro bloques numerados para ramo, metadatos, archivo/lector y revisión/autorización.
+- Búsqueda local por nombre/código y radios nativos de ramos existentes. El semestre curricular es información del ramo, nunca un campo editable del período.
+- Nombre público derivado de la normalización compartida; la extensión deriva del formato seleccionado. Título, sección, profesor y versión son datos secundarios opcionales.
+- Input de archivo y arrastrar/soltar como alternativa. Solo un archivo, hasta 25 MiB. Reemplazar, quitar, abrir/cerrar preview; errores concretos sin perder los otros datos.
+- El lector se monta fuera del formulario de metadatos: la búsqueda PDF tiene su propio formulario. Se conserva paginación, zoom, ajuste, pantalla completa y colores originales del documento en ambos temas.
+- Resumen de errores enfocable y enlazado, errores por campo asociados, controles de 44 px y declaración de permiso sin marcar inicialmente.
+- Acción final explícitamente simulada; nunca mensajes de recepción, publicación ni pendientes reales. El formulario no persiste al recargar.

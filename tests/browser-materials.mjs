@@ -40,8 +40,8 @@ const text = value => JSON.stringify(value);
 const visibleCards = `([...document.querySelectorAll('main article')].filter(e => e.getClientRects().length > 0))`;
 
 
-async function launch(noSandbox = false) {
-  const args = ['--headless', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-breakpad', '--disable-crash-reporter', '--password-store=basic', '--use-mock-keychain', '--window-size=1280,900', ...(noSandbox ? ['--no-sandbox'] : []), 'about:blank'];
+async function launch() {
+  const args = ['--headless', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-breakpad', '--disable-crash-reporter', '--password-store=basic', '--use-mock-keychain', '--window-size=1280,900', 'about:blank'];
   chrome = spawn(executable, args, { cwd: root, env: { ...process.env, HOME: browserHome, XDG_CONFIG_HOME: resolve(profile, 'config'), XDG_CACHE_HOME: resolve(profile, 'cache'), TMPDIR: resolve(profile, 'tmp') }, stdio: ['ignore', 'ignore', 'pipe'] });
   let stderr = '';
   return await new Promise((resolve, reject) => {
@@ -208,15 +208,8 @@ function errorEvent(row) { (injecting ? report.expectedErrors : report.browserEr
 
 try {
   assert.equal((await fetch(base, { signal: AbortSignal.timeout(10000) })).status, 200, 'Existing local server must be available');
-  let wsUrl;
-  try { wsUrl = await launch(); }
-  catch (error) {
-    if (!/sandbox|namespace|Operation not permitted/i.test(error.message)) throw error;
-    report.sandbox = 'disabled only for ephemeral loopback fixture browser; environment blocks sandbox';
-    report.sandboxFailure = error.message;
-    if (chrome.exitCode === null && chrome.signalCode === null) { const exited = new Promise(resolve => chrome.once('exit', resolve)); chrome.kill('SIGTERM'); await exited; }
-    wsUrl = await launch(true);
-  }
+  // A blocked sandbox is a QA limitation, not permission to bypass isolation.
+  const wsUrl = await launch();
   socket = new WebSocket(wsUrl);
   await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, { once: true }); socket.addEventListener('error', reject, { once: true }); });
   rpc = connection(socket);

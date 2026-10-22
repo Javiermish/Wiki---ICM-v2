@@ -1,4 +1,4 @@
-# Wiki ICM — Hito 1.3
+# Wiki ICM — Hito 1.4
 
 Catálogo navegable de una biblioteca colaborativa de Ingeniería Civil Matemática.
 **Prototipo con datos ficticios: los ramos no representan la malla oficial de la UdeC.**
@@ -40,9 +40,12 @@ y no requiere instalar Playwright:
 ```bash
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-catalog.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-materials.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-contributions.mjs
 ```
 
-Capturas e informe local en `.next/qa-evidence/` (ignorado por Git).
+Capturas e informes locales en `.next/qa-evidence/`, `.next/qa-materials-evidence/`
+y `.next/qa-contributions-evidence/` (ignorados por Git). Los runners de aportes y
+visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 
 ## Funcionalidades listas
 
@@ -72,6 +75,10 @@ Capturas e informe local en `.next/qa-evidence/` (ignorado por Git).
   retorno al ramo con filtros, estados sin archivo y reportes explícitamente simulados.
 - PDF original de tres páginas y tres formatos de imagen en `public/demo/`, de
   distribución autorizada. Descarga real con nombre público normalizado.
+- `/aportar`: formulario guiado con búsqueda de ramos del catálogo, metadatos,
+  nombre público normalizado, autorización obligatoria y simulación inequívoca.
+  Selección local de un PDF/JPEG/PNG/WebP, hasta 25 MiB; preview con el lector
+  existente, reemplazo y eliminación. Sin subidas ni persistencia de datos/archivos.
 
 ### URLs de prueba
 
@@ -94,6 +101,8 @@ Capturas e informe local en `.next/qa-evidence/` (ignorado por Git).
 /materiales/demo-apuntes-calculo
 /materiales/demo-certamen-calculo-1
 /materiales/demo-listado-algebra-1
+/aportar
+/aportar?ramo=calculo-i
 ```
 
 La tercera URL encuentra dos versiones del material sin cambiar el semestre curricular
@@ -114,6 +123,7 @@ src/components/catalog/  Buscador, semestres, fichas y carga
 src/components/layout/   Navegación compartida, breadcrumbs y avisos
 src/components/theme/    Control de tema (cliente)
 src/components/materials/ Lectores interactivos, toolbar y reporte simulado
+src/components/contributions/ Formulario y preview local, sin persistencia
 src/components/ui/       Primitivas reutilizables, incluido Button existente
 src/domain/              Tipos del catálogo
 src/fixtures/            Ejemplos explícitamente ficticios
@@ -125,7 +135,7 @@ scripts/                 Preparación PDF.js y generación opcional de muestras
 tests/                   node:test y navegador Chromium vía CDP
 ```
 
-No hay pantallas de aporte, moderación ni favoritos; no hay
+Hay preparación local de aportes, pero no pantallas de moderación ni favoritos; no hay
 Supabase, autenticación, subida ni publicación reales. Los reportes son una simulación sin backend. Las
 funciones futuras se señalan como **Próximamente**, no como acciones activas.
 El filtrado de fixtures no sustituye permisos de servidor/RLS en hitos futuros.
@@ -137,8 +147,9 @@ El kit original y su mockup estático se conservan en `README_HITO1.md` y
 `prototype/`; no son la aplicación implementada. Criterios y pruebas manuales:
 [`docs/HITO_1_1.md`](docs/HITO_1_1.md) (histórico) y
 [`docs/HITO_1_2.md`](docs/HITO_1_2.md) (catálogo) y
-[`docs/HITO_1_3.md`](docs/HITO_1_3.md) (lector, seguridad, pruebas y límites).
-**Hito 1.4 no iniciado: requiere aprobación.**
+[`docs/HITO_1_3.md`](docs/HITO_1_3.md) (lector, seguridad, pruebas y límites) y
+[`docs/HITO_1_4.md`](docs/HITO_1_4.md) (aportes locales y contratos futuros).
+**Hito 1.5 no autorizado ni iniciado.**
 
 ## Dependencias del lector
 

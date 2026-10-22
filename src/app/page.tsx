@@ -81,7 +81,7 @@ async function HomeContent({ searchParams }: HomeProps) {
           <div className="space-y-6 lg:pt-2">
             <div className="flex gap-4"><BookOpen className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Lectura abierta, sin registro</h3><p className="mt-1 text-sm text-muted-foreground">El material aprobado será público. Esta portada usa únicamente ejemplos ficticios.</p></div></div>
             <div className="flex gap-4"><ShieldCheck className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Compartir con cuidado</h3><p className="mt-1 text-sm text-muted-foreground">Cada aporte pasará por revisión humana antes de publicarse. Solo se aceptará material autorizado.</p></div></div>
-            <p className="rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><strong className="text-foreground">Aportar y guardar favoritos: próximamente.</strong> Los reportes son una simulación local. No hay registro, subidas ni publicaciones reales en este prototipo.</p>
+            <div className="space-y-3 rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><p><strong className="text-foreground">Prepara un aporte en una demostración local.</strong> No hay registro, subidas ni publicaciones reales. Guardar favoritos sigue próximamente; los reportes son simulados.</p><Link href="/aportar" className="text-link inline-flex min-h-11 items-center rounded font-semibold">Preparar un aporte</Link></div>
           </div>
         </div>
       </section>

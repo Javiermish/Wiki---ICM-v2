@@ -1,42 +1,131 @@
+
 {
   "$schema": "https://opencode.ai/config.json",
-  "permission": {
-    "external_directory": "ask",
-    "edit": "allow",
-    "shell": {
-      "*": "ask",
-      "git status*": "allow",
-      "git diff*": "allow",
-      "git log*": "allow"
+  "default_agent": "build",
+
+  "permissions": [
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "deny"
+    },
+
+    {
+      "action": "shell",
+      "resource": "git status *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git diff *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git log *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git show *",
+      "effect": "allow"
+    },
+
+    {
+      "action": "shell",
+      "resource": "pnpm lint *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm build *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm test *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm dev *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm exec vitest *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm exec playwright *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm exec tsc *",
+      "effect": "allow"
+    },
+
+    {
+      "action": "shell",
+      "resource": "pnpm install *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "pnpm add *",
+      "effect": "allow"
+    },
+
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "deny"
+    },
+
+    {
+      "action": "read",
+      "resource": "*.env",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*.env.*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*.env.example",
+      "effect": "allow"
+    },
+
+    {
+      "action": "edit",
+      "resource": "*.env*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": ".git/*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "opencode.json",
+      "effect": "deny"
     }
-    { "action": "read", "resource": "*", "effect": "allow" },
-    { "action": "edit", "resource": "*", "effect": "allow" },
-    { "action": "glob", "resource": "*", "effect": "allow" },
-    { "action": "grep", "resource": "*", "effect": "allow" },
-    { "action": "subagent", "resource": "*", "effect": "allow" },
-    { "action": "skill", "resource": "*", "effect": "allow" },
-    { "action": "webfetch", "resource": "*", "effect": "allow" },
-    { "action": "websearch", "resource": "*", "effect": "allow" },
+  ],
 
-    { "action": "shell", "resource": "*", "effect": "ask" },
-    { "action": "shell", "resource": "pnpm *", "effect": "allow" },
-    { "action": "shell", "resource": "git status *", "effect": "allow" },
-    { "action": "shell", "resource": "git diff *", "effect": "allow" },
-    { "action": "shell", "resource": "git log *", "effect": "allow" },
-
-    { "action": "external_directory", "resource": "*", "effect": "ask" },
-
-    { "action": "read", "resource": "*.env", "effect": "ask" },
-    { "action": "read", "resource": "*.env.*", "effect": "ask" },
-    { "action": "read", "resource": "*.env.example", "effect": "allow" }
- },
-
-  "agent": {
+  "agents": {
     "plan": {
-      "permission": {
-        "edit": "deny",
-        "shell": "ask"
-      }
+      "permissions": [
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
     }
   }
 }

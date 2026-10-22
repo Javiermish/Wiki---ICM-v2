@@ -46,3 +46,11 @@ Filtros por año, término, categoría y número se pueden combinar; búsqueda t
 - `src/lib/materials/local-source.ts`, solo servidor, consulta `publicMaterialById` antes de manifiesto/disco y comparte resolución entre ficha y lectura/descarga. La fuente limita muestras a 20 MiB y comprueba firmas; no constituye validación de uploads.
 - `/materiales/[id]/archivo` sirve bytes y `?descargar=1` utiliza el nombre normalizado con extensión permitida. IDs no aprobados, desconocidos o sin archivo reciben 404 sin detalles internos.
 - Solo muestras originales deliberadamente públicas en `public/demo`. Su URL estática es pública: ninguna comprobación de ficha revoca esos assets. Material privado futuro requerirá buckets privados, autorización servidor/RLS, validación y revisión; nunca moverlo a `public/`.
+
+## Preparación de aportes Hito 1.4
+- `src/domain/contribution.ts` define borrador, metadatos válidos y errores por campo sin depender de React. El ramo referencia un ID existente; año/término son de la edición académica, independientes de la malla.
+- Número obligatorio en listados/certámenes y opcional en apuntes. Sección, profesor y versión opcionales; sin restricción de unicidad por tipo/número/período.
+- `contributionDisplayName` comparte `materialDisplayName`; este recibe solo los campos necesarios, sin crear registros ni IDs ficticios. El formato permitido aporta la extensión canónica.
+- Política local de selección única hasta 25 MiB, configurable. MIME/extensión y firmas mínimas orientan UX; no son validación de servidor.
+- `ContributionService.submit(ContributionSubmission)` y `ContributionReceipt` son contratos futuros sin adaptador ni llamadas. La identidad y el estado `pending` deberán establecerse y autorizarse en servidor, con email verificado, RLS y Storage privado.
+- El formulario mantiene únicamente memoria temporal, no crea `CourseOffering`/`Material`, no cambia fixtures ni publica/encola aportes. Consentimiento obligatorio; nada se envía en esta demostración. Requisitos y pruebas: `docs/HITO_1_4.md`.

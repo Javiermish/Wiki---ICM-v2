@@ -6,7 +6,7 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReaderFrame, type ReaderViewport } from "./reader-frame";
-import type { DocumentReaderProps } from "./document-reader";
+import type { DocumentReaderProps, ReaderStatus } from "./document-reader";
 import { ReaderFailure } from "./reader-feedback";
 import { findTextMatches, highlightMatches, MAX_SEARCH_MATCHES, MAX_SEARCH_PAGES, MAX_SEARCH_TEXT, type PdfMatch } from "./pdf-search";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -26,32 +26,34 @@ const PDF_OPTIONS = {
   isEvalSupported: false,
 };
 
-type PdfSheetProps = ReaderViewport & { page: number; matches: PdfMatch[]; active?: PdfMatch };
+type PdfSheetProps = ReaderViewport & { page: number; matches: PdfMatch[]; active?: PdfMatch; onStatusChange?: (status: ReaderStatus) => void };
 
 function SizedPdfSheet({ pdf, retry, ...props }: PdfSheetProps & { pdf: PDFDocumentProxy; retry: () => void }) {
   const [ratio, setRatio] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
+  const { page, onStatusChange } = props;
   useEffect(() => {
     let cancelled = false;
+    onStatusChange?.("loading");
     // Activity reconnects Effects, not component state. A disposed transport can
     // throw synchronously from getPage(), before returning a Promise.
     void (async () => {
       if (pdf.loadingTask.destroyed) return;
-      const loaded = await pdf.getPage(props.page);
+      const loaded = await pdf.getPage(page);
       if (cancelled || pdf.loadingTask.destroyed) return;
       const viewport = loaded.getViewport({ scale: 1 });
       const nextRatio = viewport.height / viewport.width;
-      if (!Number.isFinite(nextRatio) || nextRatio <= 0) setFailed(true);
+      if (!Number.isFinite(nextRatio) || nextRatio <= 0) { setFailed(true); onStatusChange?.("error"); }
       else setRatio(nextRatio);
-    })().catch(() => { if (!cancelled && !pdf.loadingTask.destroyed) setFailed(true); });
+    })().catch(() => { if (!cancelled && !pdf.loadingTask.destroyed) { setFailed(true); onStatusChange?.("error"); } });
     return () => { cancelled = true; };
-  }, [pdf, props.page]);
+  }, [pdf, page, onStatusChange]);
   if (failed) return <ReaderFailure retry={retry} />;
   if (ratio === null) return <p role="status">Preparando página…</p>;
   return <PdfSheet {...props} ratio={ratio} />;
 }
 
-function PdfSheet({ page, width, zoom, matches, active, ratio }: PdfSheetProps & { ratio: number }) {
+function PdfSheet({ page, width, zoom, matches, active, ratio, onStatusChange }: PdfSheetProps & { ratio: number }) {
   const root = useRef<HTMLDivElement>(null);
   const [rendering, setRendering] = useState(true);
   const [error, setError] = useState(false);
@@ -66,14 +68,14 @@ function PdfSheet({ page, width, zoom, matches, active, ratio }: PdfSheetProps &
     if (layer) highlightMatches(layer, matches.filter((match) => match.page === page), active);
   }, [matches, active, page]);
   useEffect(highlight, [highlight]);
-  const pageFailed = useCallback(() => { setError(true); setRendering(false); }, []);
-  const pageRendered = useCallback(() => setRendering(false), []);
+  const pageFailed = useCallback(() => { setError(true); setRendering(false); onStatusChange?.("error"); }, [onStatusChange]);
+  const pageRendered = useCallback(() => { setRendering(false); onStatusChange?.("ready"); }, [onStatusChange]);
   const textFailed = useCallback(() => setTextError(true), []);
 
   return <div ref={root} aria-busy={rendering}>
     {rendering ? <p role="status" className="mb-3 text-sm">Renderizando página {page}…</p> : null}
     {textError ? <div className="mb-3 space-y-2 text-sm"><p role="status">No se pudo cargar el texto de esta página. La imagen sigue disponible.</p><Button type="button" variant="outline" className="min-h-11" onClick={() => { setTextError(false); setRendering(true); setAttempt((value) => value + 1); }}>Reintentar texto</Button></div> : null}
-    {error ? <ReaderFailure retry={() => { setError(false); setTextError(false); setRendering(true); setAttempt((value) => value + 1); }} /> : <Page
+    {error ? <ReaderFailure retry={() => { onStatusChange?.("loading"); setError(false); setTextError(false); setRendering(true); setAttempt((value) => value + 1); }} /> : <Page
       key={attempt}
       pageNumber={page}
       width={renderWidth}
@@ -95,7 +97,7 @@ function PdfSheet({ page, width, zoom, matches, active, ratio }: PdfSheetProps &
   </div>;
 }
 
-export default function PdfReader({ file, title }: DocumentReaderProps) {
+export default function PdfReader({ file, title, onStatusChange }: DocumentReaderProps) {
   const id = useId();
   // Retain only inert metadata in React state. Document owns its transport and
   // disposes it when Next's Activity hides this route, even if state survives.
@@ -111,6 +113,7 @@ export default function PdfReader({ file, title }: DocumentReaderProps) {
   const [searching, setSearching] = useState(false);
   const [searchStatus, setSearchStatus] = useState("");
   const searchRun = useRef(0);
+  useEffect(() => { onStatusChange?.("loading"); }, [onStatusChange]);
 
   useEffect(() => () => {
     currentPdf.current = null;
@@ -141,6 +144,7 @@ export default function PdfReader({ file, title }: DocumentReaderProps) {
     setActiveIndex(-1);
   }
   function retry() {
+    onStatusChange?.("loading");
     cancelSearch("");
     currentPdf.current = null;
     setPageCount(null);
@@ -206,7 +210,7 @@ export default function PdfReader({ file, title }: DocumentReaderProps) {
     setActiveIndex(index);
     setPage(matches[index].page);
   }
-  const failure = () => { setLoading(false); setLoadError(true); };
+  const failure = () => { setLoading(false); setLoadError(true); onStatusChange?.("error"); };
 
   return <ReaderFrame title={title} toolbar={<div className="flex items-center gap-1">
     <Button type="button" variant="ghost" className="size-11" aria-label="Página anterior" disabled={!pageCount || page <= 1} onClick={() => setPage((value) => value - 1)}><ChevronLeft aria-hidden="true" /></Button>
@@ -231,7 +235,7 @@ export default function PdfReader({ file, title }: DocumentReaderProps) {
       </form>
       <div aria-busy={loading}>
         {loadError ? <ReaderFailure retry={retry} /> : <Document key={attempt} file={file.url} options={PDF_OPTIONS} suspense={false} loading={<p role="status" className="p-6">Cargando PDF…</p>} error={<ReaderFailure retry={retry} />} noData={<p role="status">No hay un archivo disponible.</p>} onSourceError={failure} onLoadError={failure} onPassword={failure} onLoadSuccess={documentLoaded}>
-          {({ pdf }) => pdf.loadingTask.destroyed ? <p role="status">Cargando PDF…</p> : <SizedPdfSheet key={`${pdf.loadingTask.docId}:${page}:${viewport.width}:${viewport.zoom}`} pdf={pdf} retry={retry} page={page} {...viewport} matches={matches} active={matches[activeIndex]} />}
+          {({ pdf }) => pdf.loadingTask.destroyed ? <p role="status">Cargando PDF…</p> : <SizedPdfSheet key={`${pdf.loadingTask.docId}:${page}:${viewport.width}:${viewport.zoom}`} pdf={pdf} retry={retry} page={page} {...viewport} matches={matches} active={matches[activeIndex]} onStatusChange={onStatusChange} />}
         </Document>}
       </div>
     </>}

@@ -7,7 +7,7 @@ export function normalizeSearch(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").trim();
 }
 
-export function materialDisplayName(material: Material, offering: CourseOffering): string {
+export function materialDisplayName(material: Pick<Material, "category" | "documentNumber">, offering: Pick<CourseOffering, "academicYear" | "academicTerm">): string {
   const number = material.documentNumber === null ? "" : ` ${material.documentNumber}`;
   return `${singularLabels[material.category]}${number} - ${offering.academicYear}-${offering.academicTerm}`;
 }
