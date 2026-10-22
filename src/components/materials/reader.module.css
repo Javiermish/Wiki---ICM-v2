@@ -1,0 +1,17 @@
+.page {
+  width: max-content;
+  margin-inline: auto;
+  background: white;
+  color-scheme: light;
+}
+
+.page mark[data-reader-match] {
+  color: transparent;
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  padding: 0;
+}
+
+.page mark[data-active] {
+  background: color-mix(in srgb, var(--primary) 50%, transparent);
+  outline: 2px solid var(--ring);
+}

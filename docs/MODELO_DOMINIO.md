@@ -39,3 +39,10 @@ Filtros por año, término, categoría y número se pueden combinar; búsqueda t
 - Los IDs de fixtures son cadenas estables identificadas como demo. No existe restricción de unicidad por categoría/número/período: dos versiones conservan IDs distintos.
 - `approvedMaterials`, `courseMaterials`, `courseFacets` y `publicMaterialById` comparten el filtrado por aprobación; nunca proyectan nombre original ni fecha de subida.
 - Los ramos se exploran independientemente de sus materiales: una categoría o un ramo vacío sigue siendo navegable.
+
+## Archivos locales Hito 1.3
+- `PublicMaterialFile` y `MaterialFileSource` (`src/domain/material-file.ts`) desacoplan UI de una fuente local o futuro Storage. No se deduce formato ni nombre público desde `originalFilename`.
+- `src/fixtures/material-files.ts` es una allowlist separada; los metadatos aprobados pueden existir sin un archivo. No se agregan enlaces ficticios para completarlos.
+- `src/lib/materials/local-source.ts`, solo servidor, consulta `publicMaterialById` antes de manifiesto/disco y comparte resolución entre ficha y lectura/descarga. La fuente limita muestras a 20 MiB y comprueba firmas; no constituye validación de uploads.
+- `/materiales/[id]/archivo` sirve bytes y `?descargar=1` utiliza el nombre normalizado con extensión permitida. IDs no aprobados, desconocidos o sin archivo reciben 404 sin detalles internos.
+- Solo muestras originales deliberadamente públicas en `public/demo`. Su URL estática es pública: ninguna comprobación de ficha revoca esos assets. Material privado futuro requerirá buckets privados, autorización servidor/RLS, validación y revisión; nunca moverlo a `public/`.

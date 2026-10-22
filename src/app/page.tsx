@@ -48,7 +48,7 @@ async function HomeContent({ searchParams }: HomeProps) {
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
             <h2 id="materials-heading" className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">{searching ? "Resultados de tu búsqueda" : "Materiales para explorar"}</h2>
-            <p className="mt-2 text-muted-foreground">{filters.q ? <>Consulta: «{filters.q}». </> : null}Ejemplos aprobados en el catálogo ficticio. El visor y la descarga estarán disponibles más adelante.</p>
+            <p className="mt-2 text-muted-foreground">{filters.q ? <>Consulta: «{filters.q}». </> : null}Ejemplos aprobados en el catálogo ficticio. Abre un material para leer y descargar los archivos de demostración disponibles.</p>
           </div>
           {searching ? <Link className="text-link inline-flex min-h-11 items-center rounded text-sm font-semibold" href="/#materiales">Restablecer búsqueda</Link> : <Badge>Catálogo de demostración</Badge>}
         </div>
@@ -81,7 +81,7 @@ async function HomeContent({ searchParams }: HomeProps) {
           <div className="space-y-6 lg:pt-2">
             <div className="flex gap-4"><BookOpen className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Lectura abierta, sin registro</h3><p className="mt-1 text-sm text-muted-foreground">El material aprobado será público. Esta portada usa únicamente ejemplos ficticios.</p></div></div>
             <div className="flex gap-4"><ShieldCheck className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Compartir con cuidado</h3><p className="mt-1 text-sm text-muted-foreground">Cada aporte pasará por revisión humana antes de publicarse. Solo se aceptará material autorizado.</p></div></div>
-            <p className="rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><strong className="text-foreground">Aportar, guardar favoritos y reportar: próximamente.</strong> No hay registro, subidas ni publicaciones reales en este prototipo.</p>
+            <p className="rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><strong className="text-foreground">Aportar y guardar favoritos: próximamente.</strong> Los reportes son una simulación local. No hay registro, subidas ni publicaciones reales en este prototipo.</p>
           </div>
         </div>
       </section>

@@ -13,7 +13,7 @@ export function SiteFooter() {
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#explorar">Explorar ejemplos</Link>
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#comunidad">Sobre el proyecto</Link>
           </nav>
-          <p>Prototipo · Hito 1.2. Sin documentos reales conectados.</p>
+          <p>Prototipo · Hito 1.3. Archivos locales de demostración.</p>
           <p>No representa la malla oficial de la UdeC.</p>
         </div>
       </div>

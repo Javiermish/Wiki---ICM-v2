@@ -184,7 +184,7 @@
 }
 
 /* Outside layers so primitive outline-none utilities cannot hide keyboard focus. */
-:where(a, button, input, select, summary):focus-visible {
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--ring);
   outline-offset: 4px;
 }

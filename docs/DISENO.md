@@ -11,7 +11,7 @@ Tipografía sans legible para UI; titulares claros y jerarquía 32-48/24/18/14 p
 1. `/`: hero con buscador, accesos por semestre curricular, últimos aportes aprobados simulados y CTA para aportar.
 2. `/semestres/[semestre]`: listado de ramos; campo de búsqueda local.
 3. `/ramos/[slug]`: ficha de ramo, tabs `Listados | Apuntes | Certámenes`, filtros Año y Periodo académico, tarjetas con número y fecha.
-4. `/materiales/[id]`: cabecera, breadcrumbs, visor PDF/imagen placeholder (no fingir visor real) y botón de descarga demo claramente identificado.
+4. `/materiales/[id]`: en Hito 1.3 autorizado, cabecera, breadcrumbs, lector PDF/imagen real y descarga de archivos originales de demostración; ficha sin archivo muestra disponibilidad explicativa, nunca un visor ficticio.
 5. `/aportar`: diseño de formulario con ramo, categoría, número, año, semestre académico, archivos y aviso de moderación.
 6. `/moderacion`: prototipo restringido simulado con cola de revisión; ruta real requerirá autorización servidor.
 7. `/favoritos`: lista guardada para cuenta; en Hito 1 simular para demo, dejar claro que el guardado real requiere login.
@@ -27,3 +27,10 @@ Carga, sin resultados, ausencia de favoritos, error de documento, pendiente de r
 
 ## Pruebas visuales
 Capturas a 375, 768, 1280 y 1440px; modo claro/oscuro; keyboard tab; foco; contraste; no desbordes; navegación; texto largo y sin resultados.
+
+## Lector Hito 1.3
+- Documento protagonista a todo el ancho del `page-container` existente (máximo 1152 px); metadatos debajo, sin sidebar permanente.
+- Toolbar compacta con wrapping móvil, controles de al menos 44 px, paginación, zoom, ajuste al ancho, restablecer y pantalla completa. Solo una página PDF montada a la vez.
+- Búsqueda de texto real cuando el PDF lo contiene; sin prometer OCR. No invertir colores del documento en tema oscuro.
+- Navegación desde tarjeta a ficha con filtros del ramo conservados; breadcrumbs distinguen semestre curricular de período académico.
+- Diálogo de reporte etiquetado como demostración, sin envíos ni persistencia reales.

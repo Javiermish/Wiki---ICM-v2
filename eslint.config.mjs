@@ -11,6 +11,8 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    // Vendor assets copied verbatim from the locked PDF.js package by predev/prebuild.
+    "public/pdfjs/**",
     "next-env.d.ts",
   ]),
 ]);

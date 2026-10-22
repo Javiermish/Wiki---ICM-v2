@@ -1,0 +1,130 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 626 >>
+stream
+BT
+/F1 20 Tf
+48 780 Td
+(Certamen 2 - 2024-2) Tj
+0 -42 Td
+/F1 11 Tf
+(Calculo I / Semestre curricular 1) Tj
+0 -42 Td
+/F1 11 Tf
+(DEMOSTRACION ORIGINAL - No es una evaluacion oficial.) Tj
+0 -42 Td
+/F1 11 Tf
+(1. Limites y continuidad) Tj
+0 -42 Td
+/F1 11 Tf
+(Sea f\(x\) = x + 2. Calcula el limite cuando x tiende a 3.) Tj
+0 -42 Td
+/F1 11 Tf
+(Explica por que esta funcion tiene continuidad en x = 3.) Tj
+0 -42 Td
+/F1 11 Tf
+(Texto seleccionable y buscable. Busca: continuidad.) Tj
+0 -42 Td
+/F1 11 Tf
+(Contenido original creado para probar Wiki ICM. Distribucion autorizada.) Tj
+ET
+BT /F1 10 Tf 48 40 Td (Wiki ICM - Demo - 1 / 3) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 556 >>
+stream
+BT
+/F1 20 Tf
+48 780 Td
+(Certamen 2 - 2024-2 / Desarrollo) Tj
+0 -42 Td
+/F1 11 Tf
+(DEMOSTRACION ORIGINAL - Pagina 2) Tj
+0 -42 Td
+/F1 11 Tf
+(2. Una solucion breve) Tj
+0 -42 Td
+/F1 11 Tf
+(El limite es 5: sustituimos x = 3 en la expresion x + 2.) Tj
+0 -42 Td
+/F1 11 Tf
+(La continuidad permite relacionar el valor y el limite.) Tj
+0 -42 Td
+/F1 11 Tf
+(Actividad: escribe una explicacion con tus propias palabras.) Tj
+0 -42 Td
+/F1 11 Tf
+(Esta pagina sirve para comprobar navegacion y seleccion de texto.) Tj
+ET
+BT /F1 10 Tf 48 40 Td (Wiki ICM - Demo - 2 / 3) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 598 >>
+stream
+BT
+/F1 20 Tf
+48 780 Td
+(Certamen 2 - 2024-2 / Repaso) Tj
+0 -42 Td
+/F1 11 Tf
+(DEMOSTRACION ORIGINAL - Pagina 3) Tj
+0 -42 Td
+/F1 11 Tf
+(3. Para seguir practicando) Tj
+0 -42 Td
+/F1 11 Tf
+(Prueba ahora con g\(x\) = 2x - 1 y x = 4.) Tj
+0 -42 Td
+/F1 11 Tf
+(Compara continuidad, valor de la funcion y limite.) Tj
+0 -42 Td
+/F1 11 Tf
+(Resultado de comprobacion: 7.) Tj
+0 -42 Td
+/F1 11 Tf
+(Fin del documento de demostracion. No contiene datos personales.) Tj
+0 -42 Td
+/F1 11 Tf
+(Wiki ICM autoriza copiar y distribuir este ejemplo original \(CC0\).) Tj
+ET
+BT /F1 10 Tf 48 40 Td (Wiki ICM - Demo - 3 / 3) Tj ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000133 00000 n 
+0000000203 00000 n 
+0000000329 00000 n 
+0000001006 00000 n 
+0000001132 00000 n 
+0000001739 00000 n 
+0000001865 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+2514
+%%EOF

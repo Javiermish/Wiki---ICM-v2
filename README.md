@@ -1,4 +1,4 @@
-# Wiki ICM — Hito 1.2
+# Wiki ICM — Hito 1.3
 
 Catálogo navegable de una biblioteca colaborativa de Ingeniería Civil Matemática.
 **Prototipo con datos ficticios: los ramos no representan la malla oficial de la UdeC.**
@@ -31,7 +31,7 @@ Con producción iniciada, comprobación HTTP opcional de rutas y estados:
 WIKI_TEST_BASE_URL=http://localhost:3000 pnpm test
 ```
 
-Sin esa variable se omiten las dos suites HTTP. Las pruebas de catálogo,
+Sin esa variable se omiten las suites HTTP. Las pruebas de catálogo,
 contraste de tokens y tema con APIs simuladas no necesitan servidor ni navegador.
 
 La comprobación de navegador es opcional, usa Chrome/Chromium existente vía CDP
@@ -39,6 +39,7 @@ y no requiere instalar Playwright:
 
 ```bash
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-catalog.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-materials.mjs
 ```
 
 Capturas e informe local en `.next/qa-evidence/` (ignorado por Git).
@@ -65,6 +66,12 @@ Capturas e informe local en `.next/qa-evidence/` (ignorado por Git).
   Pruebas para Cálculo I (curricular 1) y **Certamen 2 - 2024-2**.
 - Breadcrumbs en resultados, enlace de salto, etiquetas, foco visible y estado
   de carga accesible para el renderizado progresivo de Next.js.
+- `/materiales/[id]`: lector PDF real con React-PDF/PDF.js, navegación de páginas,
+  búsqueda/selección de texto, zoom, ajuste al ancho, restablecer y pantalla completa.
+- Imágenes PNG/JPEG/WebP sin recortes, zoom y descarga del original; ficha académica,
+  retorno al ramo con filtros, estados sin archivo y reportes explícitamente simulados.
+- PDF original de tres páginas y tres formatos de imagen en `public/demo/`, de
+  distribución autorizada. Descarga real con nombre público normalizado.
 
 ### URLs de prueba
 
@@ -82,6 +89,11 @@ Capturas e informe local en `.next/qa-evidence/` (ignorado por Git).
 /ramos/calculo-i
 /ramos/calculo-i?tipo=certamenes&anio=2024&periodo=2&numero=2
 /ramos/geometria?tipo=apuntes
+/materiales/demo-certamen-calculo-2
+/materiales/demo-listado-calculo-3
+/materiales/demo-apuntes-calculo
+/materiales/demo-certamen-calculo-1
+/materiales/demo-listado-algebra-1
 ```
 
 La tercera URL encuentra dos versiones del material sin cambiar el semestre curricular
@@ -97,20 +109,24 @@ o repetidos muestran errores y no devuelven materiales. Sin `tipo` se abre Lista
 ## Arquitectura y límites
 
 ```text
-src/app/                 Layout, portada, semestres y ramos (Server Components)
+src/app/                 Layout, catálogo, fichas públicas y endpoint de archivos
 src/components/catalog/  Buscador, semestres, fichas y carga
 src/components/layout/   Navegación compartida, breadcrumbs y avisos
 src/components/theme/    Control de tema (cliente)
+src/components/materials/ Lectores interactivos, toolbar y reporte simulado
 src/components/ui/       Primitivas reutilizables, incluido Button existente
 src/domain/              Tipos del catálogo
 src/fixtures/            Ejemplos explícitamente ficticios
 src/lib/catalog/         Consulta, proyección pública y contrato de filtros URL
+src/lib/materials/       Fuente de archivos solo servidor, nombres y navegación
 src/lib/theme.ts         Preferencia y script inicial del tema
-tests/                   Pruebas con node:test, sin dependencias adicionales
+public/demo/             Muestras originales intencionalmente públicas
+scripts/                 Preparación PDF.js y generación opcional de muestras
+tests/                   node:test y navegador Chromium vía CDP
 ```
 
-No hay pantallas de material, aporte, moderación ni favoritos; no hay
-Supabase, autenticación, subida, publicación, visor ni descarga reales. Las
+No hay pantallas de aporte, moderación ni favoritos; no hay
+Supabase, autenticación, subida ni publicación reales. Los reportes son una simulación sin backend. Las
 funciones futuras se señalan como **Próximamente**, no como acciones activas.
 El filtrado de fixtures no sustituye permisos de servidor/RLS en hitos futuros.
 El prototipo incluye metadata `noindex`. Los fixtures incluyen casos pendientes y
@@ -120,5 +136,16 @@ y acceso por ID. No se envían nombres originales al cliente.
 El kit original y su mockup estático se conservan en `README_HITO1.md` y
 `prototype/`; no son la aplicación implementada. Criterios y pruebas manuales:
 [`docs/HITO_1_1.md`](docs/HITO_1_1.md) (histórico) y
-[`docs/HITO_1_2.md`](docs/HITO_1_2.md) (catálogo actual).
-**Hito 1.3 no iniciado: requiere aprobación.**
+[`docs/HITO_1_2.md`](docs/HITO_1_2.md) (catálogo) y
+[`docs/HITO_1_3.md`](docs/HITO_1_3.md) (lector, seguridad, pruebas y límites).
+**Hito 1.4 no iniciado: requiere aprobación.**
+
+## Dependencias del lector
+
+React-PDF **11.0.0** (React 19+, Node 22.13+) y PDF.js **6.3.289** exactos,
+compatibles con Next 16.4.2 / React 19.3.0 / Node 26.11.1 instalados.
+PDF.js es dependencia directa para resolver el worker con pnpm sin hoisting adicional.
+El worker se empaqueta localmente; `predev` y `prebuild` copian fuentes estándar,
+cMaps y WASM de esa misma versión a `public/pdfjs/` (generado, ignorado en Git).
+No hay CDN de documentos, worker ni fuentes. El motor PDF se carga dinámicamente
+en cliente, sin SSR y sin incorporarse a las páginas de exploración.

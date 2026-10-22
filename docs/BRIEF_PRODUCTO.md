@@ -23,5 +23,7 @@ Tres clics aproximados desde inicio a un material relevante (no regla técnica r
 ## Fuera de Hito 1
 Autenticación real, base de datos real, upload real, visor PDF real, moderación real y deploy. Hito 1 los representa como pantallas estáticas/mocks y componentes accesibles.
 
+**Ampliación autorizada en Hito 1.3:** lectura PDF e imágenes y descarga reales, exclusivamente con archivos locales originales de demostración. Reportes explícitamente simulados. No se habilitan servicios de autenticación, DB, Storage, subidas, moderación ni despliegue. El Hito 1.4 requiere aprobación independiente.
+
 ## Restricciones
 No afirmar que los ramos de ejemplo conforman la malla oficial. No almacenar ni publicar documentos de terceros sin permiso. Moderación y políticas de acceso deben estar del lado del servidor en versión funcional.

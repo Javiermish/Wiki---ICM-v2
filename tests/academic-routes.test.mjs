@@ -101,7 +101,7 @@ test("navegación HTTP de semestres, ramos, categorías y filtros", { skip: !bas
     for (const path of [
       "/semestres/0", "/semestres/5", "/semestres/abc", "/semestres/1.0", "/semestres/01", "/semestres/-1",
       "/ramos/no-existe", "/ramos/demo-pending-calculo", "/ramos/demo-rejected-calculo",
-      "/materiales/demo-pending-calculo", "/materiales/demo-rejected-calculo", "/materiales/demo-certamen-calculo-2",
+      "/materiales/demo-pending-calculo", "/materiales/demo-rejected-calculo", "/materiales/no-existe",
     ]) await page(path, 404);
     const privateSearch = await page("/?q=privado");
     assert.equal((privateSearch.match(/<article\b/g) ?? []).length, 0);
