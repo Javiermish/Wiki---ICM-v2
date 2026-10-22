@@ -391,7 +391,7 @@ try {
     await focus('dialog select'); await press('End'); await press('Tab');
     await call('Input.insertText', { text: 'Prueba QA local, sin datos personales.' });
     await focus('dialog button[type="submit"]'); await press('Enter');
-    await wait(`document.querySelector('dialog [role="status"]')?.textContent.includes('No se envió ni se guardó')`);
+    await wait(`document.querySelector('dialog [role="status"]')?.textContent.includes('No se envió ni guardó en un servidor')`);
     await press('Escape');
     await wait(`!document.querySelector('dialog').open && document.activeElement?.textContent.trim()==='Reportar material'`);
     await press('Enter');

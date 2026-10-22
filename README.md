@@ -1,4 +1,4 @@
-# Wiki ICM — Hito 1.4.1 (ampliación local de Hito 1.4)
+# Wiki ICM — Hito 1.5
 
 Catálogo navegable de una biblioteca colaborativa de Ingeniería Civil Matemática.
 **Prototipo con datos ficticios: los ramos no representan la malla oficial de la UdeC.**
@@ -41,10 +41,14 @@ y no requiere instalar Playwright:
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-catalog.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-materials.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-contributions.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-courses.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-favorites.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-moderation.mjs
 ```
 
-Capturas e informes locales en `.next/qa-evidence/`, `.next/qa-materials-evidence/`
-y `.next/qa-contributions-evidence/` (ignorados por Git). Los runners de aportes y
+Capturas e informes locales en `.next/qa-evidence/`, `.next/qa-materials-evidence/`,
+`.next/qa-contributions-evidence/`, `.next/qa-courses-evidence/`,
+`.next/qa-favorites-evidence/` y `.next/qa-moderation-evidence/` (ignorados por Git). Los runners de aportes y
 visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 
 ## Funcionalidades del alcance vigente
@@ -58,8 +62,12 @@ visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
   Estadística y Otro; búsqueda por nombre/código, áreas vacías y parámetros en URL.
 - `/gestion/asignaturas`: consulta, creación, edición, reclasificación, archivo y
   reapertura **DEMO pública sin login**. Identidad/ruta estables; no elimina documentos.
-- `/favoritos`: selección DEMO local de materiales aprobados, con añadir/quitar;
+- `/favoritos`: asignaturas regulares/electivas y materiales aprobados agrupados,
+  con añadir/quitar y persistencia defensiva en este navegador;
   no es un guardado en una cuenta ni una autenticación simulada.
+- `/moderacion`: demo pública de revisión de aportes, solicitudes de asignaturas
+  y reportes. Correcciones, decisiones confirmadas e historial solo en memoria;
+  aprobar no publica archivos ni incorpora ramos al catálogo.
 - `/ramos/[slug]`: ficha del ramo, breadcrumbs, Listados, Apuntes y Certámenes;
   filtros combinables por año, semestre académico y número, conservados en URL.
 - Múltiples secciones/versiones del mismo documento con identificadores únicos;
@@ -104,6 +112,7 @@ visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 /electivos?area=numerico
 /electivos?area=optimizacion
 /gestion/asignaturas
+/moderacion
 /favoritos
 /ramos/calculo-i
 /ramos/calculo-i?tipo=certamenes&anio=2024&periodo=2&numero=2
@@ -122,9 +131,14 @@ del ramo. La cuarta y quinta muestran el estado vacío. `/?term=7` muestra una
 advertencia, sin devolver silenciosamente todo el catálogo. Geometría ilustra un
 ramo sin materiales; el semestre 4 tampoco tiene ramos en la semilla inicial.
 
-Gestión y favoritos comparten memoria durante la navegación cliente con `Next Link`/
-`Next Form`; recargar/cerrar u otra pestaña descarta los cambios. No hay persistencia
-de catálogo/favoritos en almacenamiento web ni servidor. Editar o reclasificar mantiene
+Gestión, moderación y reportes comparten memoria durante la navegación cliente con
+`Next Link`/`Next Form`; recargar/cerrar u otra pestaña restablece esos datos. Favoritos
+guarda únicamente referencias tipadas en `localStorage` (`wiki-icm:favorites:v1`),
+sin cuenta ni sincronización entre dispositivos o en vivo entre pestañas. Datos
+inválidos y referencias no públicas se omiten; fallos de almacenamiento dejan la
+selección en memoria con un aviso. Favoritos de ramos locales que ya no existen se
+descartan al recargar. No hay persistencia de catálogo en almacenamiento web ni
+servidor. Editar o reclasificar mantiene
 IDs/slugs y documentos; archivar retira selectores activos, **no despublica materiales
 aprobados**. Los nuevos ramos usan `/ramos/local-<uuid>`. El servidor entrega un shell
 HTTP 200 para ese prefijo válido incluso si no existe en la memoria cliente; muestra
@@ -142,6 +156,7 @@ src/app/                 Layout, catálogo, fichas públicas y endpoint de archi
 src/components/catalog/  Buscador, semestres, fichas y carga
                          Provider de catálogo DEMO y exploración de electivos
 src/components/courses/  Gestión pública DEMO de asignaturas
+src/components/moderation/ Panel y estado aislado de revisión DEMO
 src/components/layout/   Navegación compartida, breadcrumbs y avisos
 src/components/theme/    Control de tema (cliente)
 src/components/materials/ Lectores interactivos, toolbar y reporte simulado
@@ -151,6 +166,8 @@ src/domain/              Tipos del catálogo, validación y puertos asíncronos 
 src/fixtures/            Ejemplos explícitamente ficticios
 src/lib/catalog/         Consulta, allowlist pública, repositorio DEMO y filtros URL
 src/lib/materials/       Fuente de archivos solo servidor, nombres y navegación
+src/lib/favorites/       Adaptador de favoritos locales versionados y recuperables
+src/lib/moderation/      Servicio de revisión DEMO sin publicación
 src/lib/theme.ts         Preferencia y script inicial del tema
 public/demo/             Muestras originales intencionalmente públicas
 scripts/                 Preparación PDF.js y generación opcional de muestras
@@ -160,8 +177,8 @@ tests/                   node:test y navegador Chromium vía CDP
 Hay aportes preparados localmente, electivos, gestión y favoritos DEMO; no hay
 moderación, Supabase, autenticación, DB, Storage, subida ni publicación reales.
 La gestión abierta no tiene permisos efectivos ni representa una administración segura.
-Solicitudes de creación/revisión solo tienen contratos futuros, sin envío ni cola real.
-Los reportes son una simulación sin backend. Las funciones futuras se señalan como
+Solicitudes y reportes alimentan únicamente una cola DEMO en memoria, sin envío ni
+revisión real. Las funciones futuras se señalan como
 **Próximamente**, no como acciones activas.
 El filtrado de fixtures no sustituye permisos de servidor/RLS en hitos futuros.
 El prototipo incluye metadata `noindex`. Los fixtures incluyen casos pendientes y
@@ -180,11 +197,11 @@ El kit original y su mockup estático se conservan en `README_HITO1.md` y
 [`docs/HITO_1_2.md`](docs/HITO_1_2.md) (catálogo) y
 [`docs/HITO_1_3.md`](docs/HITO_1_3.md) (lector, seguridad, pruebas y límites) y
 [`docs/HITO_1_4.md`](docs/HITO_1_4.md) (aportes locales y contratos futuros, histórico) y
-[`docs/HITO_1_4_1.md`](docs/HITO_1_4_1.md) (alcance vigente: electivos, gestión,
-favoritos DEMO, integración, límites y verificaciones **pendientes de completar**).
+[`docs/HITO_1_4_1.md`](docs/HITO_1_4_1.md) (histórico: electivos y gestión) y
+[`docs/HITO_1_5.md`](docs/HITO_1_5.md) (alcance vigente, pruebas y límites).
 Restricciones/consultas DB recomendadas y revisión transaccional futura en
 [`docs/MODELO_DOMINIO.md`](docs/MODELO_DOMINIO.md); son diseño, no migraciones aplicadas.
-**Hito 1.5 no autorizado ni iniciado.**
+**No se inicia Hito 2.1 ni se conecta Supabase.**
 
 ## Dependencias del lector
 

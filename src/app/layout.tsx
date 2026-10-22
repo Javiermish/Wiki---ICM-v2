@@ -4,7 +4,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { PrototypeNotice } from "@/components/layout/prototype-notice";
 import { themeInitializationScript } from "@/lib/theme";
 import { CourseCatalogProvider } from "@/components/catalog/course-catalog-provider";
-import { FavoritesProvider } from "@/components/catalog/favorites-provider";
+import { FavoritesFeedback, FavoritesProvider } from "@/components/catalog/favorites-provider";
+import { ModerationProvider } from "@/components/moderation/moderation-provider";
 import { getPublicDemoCatalog } from "@/lib/catalog/data";
 import "./globals.css";
 
@@ -28,10 +29,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a href="#contenido" className="fixed top-3 left-4 z-50 -translate-y-24 rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground focus:translate-y-0">Saltar al contenido</a>
         <CourseCatalogProvider initialCatalog={getPublicDemoCatalog()}>
           <FavoritesProvider>
+          <ModerationProvider>
           <SiteHeader />
-          <PrototypeNotice />
+           <PrototypeNotice />
+           <FavoritesFeedback />
           {children}
           <SiteFooter />
+          </ModerationProvider>
           </FavoritesProvider>
         </CourseCatalogProvider>
       </body>

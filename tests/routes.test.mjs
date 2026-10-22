@@ -35,21 +35,18 @@ test("rutas y HTML del prototipo", { skip: !base }, async (t) => {
       }
       assert.ok(!html.includes("archivo-ejemplo.pdf"), "sin nombres originales en HTML público");
       assert.ok(html.includes('href="/aportar"'), "acceso al formulario local autorizado en Hito 1.4");
-      for (const route of ["/moderacion"]) {
-        assert.ok(!html.includes(`href="${route}`), `no hay enlaces a ${route}`);
-      }
       if (count > 0 && path.includes("2024")) {
         assert.match(html, /<article\b[\s\S]*?Cálculo I[\s\S]*?Semestre curricular(?: <!-- -->| )1[\s\S]*?2024-2[\s\S]*?<\/article>/);
       }
     });
   }
   await t.test("fuera de alcance sigue siendo 404", async () => {
-    for (const path of ["/moderacion", "/semestres/13"]) {
+    for (const path of ["/semestres/13"]) {
       assert.equal((await fetch(new URL(path, base))).status, 404, path);
     }
   });
   await t.test("favoritos locales y semestre curricular vacío son públicos", async () => {
-    for (const path of ["/favoritos", "/semestres/5"]) {
+    for (const path of ["/moderacion", "/favoritos", "/semestres/5"]) {
       const response = await fetch(new URL(path, base));
       assert.equal(response.status, 200, path);
       const html = await response.text();

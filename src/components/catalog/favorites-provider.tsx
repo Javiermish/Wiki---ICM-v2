@@ -1,23 +1,31 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import type { FavoriteReference } from "@/domain/favorites";
+import { sameFavorite } from "@/domain/favorites";
+import { createLocalFavoritesStore } from "@/lib/favorites/local-store";
+import { useCourseCatalog } from "./course-catalog-provider";
 
 interface FavoritesContextValue {
-  readonly ids: readonly string[];
-  readonly toggle: (id: string) => void;
+  readonly references: readonly FavoriteReference[];
+  readonly ready: boolean;
+  readonly warning: string | null;
+  readonly toggle: (reference: FavoriteReference) => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
-/** Solo IDs de materiales en memoria del árbol cliente: sin cuenta ni persistencia.
- * No constituye autorización; las vistas resuelven siempre la proyección aprobada.
- */
+/** Referencias locales, sin cuenta; siempre se resuelven contra el catálogo público. */
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const [ids, setIds] = useState<readonly string[]>([]);
-  const toggle = useCallback((id: string) => {
-    setIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
-  }, []);
-  const value = useMemo(() => ({ ids, toggle }), [ids, toggle]);
+  const { catalog } = useCourseCatalog();
+  const [store] = useState(() => createLocalFavoritesStore(() => window.localStorage));
+  const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
+  useEffect(() => { store.hydrate(catalog); }, [store, catalog]);
+  const toggle = useCallback((reference: FavoriteReference) => {
+    const saved = store.getSnapshot().references.some(item => sameFavorite(item, reference));
+    store.setSaved(reference, !saved, catalog);
+  }, [store, catalog]);
+  const value = useMemo(() => ({ ...snapshot, toggle }), [snapshot, toggle]);
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 }
 
@@ -25,4 +33,9 @@ export function useFavorites(): FavoritesContextValue {
   const value = useContext(FavoritesContext);
   if (!value) throw new Error("Los favoritos de demo requieren FavoritesProvider.");
   return value;
+}
+
+export function FavoritesFeedback() {
+  const { warning } = useFavorites();
+  return <div role="status" aria-live="polite" className={warning ? "page-container my-4 rounded-xl border border-border bg-secondary p-4 text-sm text-secondary-foreground" : "sr-only"}>{warning}</div>;
 }

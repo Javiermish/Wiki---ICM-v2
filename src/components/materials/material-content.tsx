@@ -46,7 +46,7 @@ export function MaterialContent({ id, file, filters, hasContext }: { id: string;
       <div className="flex flex-wrap items-center gap-2">
         <FavoriteButton materialId={material.id} materialName={`${material.displayName} · ${material.course.name}${material.section ? ` · Sección ${material.section}` : ""}`} />
         {file ? <a href={file.downloadUrl} download={file.downloadName} className={`${buttonVariants()} min-h-11`}><Download aria-hidden="true" className="size-4" />Descargar {file.extension.toUpperCase()}</a> : null}
-        <DemoReportDialog materialName={material.displayName} />
+        <DemoReportDialog materialId={material.id} materialName={material.displayName} />
       </div>
     </div>
     {material.course.status === "archived" ? <div className="mb-6 rounded-xl border border-border bg-muted p-4 text-sm"><p><strong>Ramo archivado.</strong> Este material aprobado sigue disponible para lectura y descarga.</p><Link href="/gestion/asignaturas" className="text-link mt-2 inline-flex min-h-11 items-center rounded font-semibold">Gestionar ramos · demo local</Link></div> : null}

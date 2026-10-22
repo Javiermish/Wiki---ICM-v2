@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useCourseCatalog } from "@/components/catalog/course-catalog-provider";
 import { CourseFilters } from "@/components/catalog/course-filters";
 import { MaterialCard } from "@/components/catalog/material-card";
+import { FavoriteButton } from "@/components/catalog/favorite-button";
 import type { CatalogFilters } from "@/domain/catalog";
 import { categoryLabels, courseClassification, courseFacets, courseMaterials, courseParentBreadcrumb } from "@/lib/catalog/query";
 import { courseHref } from "@/lib/catalog/course-filters";
@@ -34,6 +35,7 @@ export function CourseContent({ slug, filters, errors }: { slug: string; filters
       {course.code ? <p className="mt-4 text-sm font-medium text-muted-foreground">Código de ejemplo: {course.code}</p> : null}
       <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{course.name}</h1>
       <p className="mt-3 font-medium">{courseClassification(course, catalog.electiveAreas)}</p>
+      <div className="mt-4"><FavoriteButton courseId={course.id} courseName={course.name} /></div>
       {course.description ? <p className="mt-2 max-w-2xl text-muted-foreground">{course.description}</p> : null}
       <p className="mt-2 max-w-2xl text-muted-foreground">Ramo y materiales ficticios: no representan la malla oficial de la UdeC. El período académico de cada documento es independiente del semestre curricular.</p>
       {course.status === "archived" ? <div className="mt-4 rounded-xl border border-border bg-muted p-4 text-sm"><p><strong>Ramo archivado.</strong> Sus materiales aprobados siguen disponibles, pero no se preparan nuevos aportes para este ramo.</p><Link href="/gestion/asignaturas" className="text-link mt-2 inline-flex min-h-11 items-center rounded font-semibold">Gestionar ramos · demo local</Link></div> : <Link href={`/aportar?ramo=${encodeURIComponent(course.slug)}`} className="text-link mt-3 inline-flex min-h-11 items-center rounded text-sm font-semibold">Preparar un aporte para este ramo · demo local</Link>}

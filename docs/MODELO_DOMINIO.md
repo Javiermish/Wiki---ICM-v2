@@ -1,5 +1,7 @@
 # Modelo de dominio propuesto (Hito 1: diseño, no migración SQL)
 
+> Las secciones 1.4.1 conservan decisiones históricas. Hito 1.5 autoriza moderación/reportes DEMO y favoritos persistidos localmente; su ampliación al final y `HITO_1_5.md` prevalecen sobre las antiguas notas de no autorización. No hay backend conectado.
+
 ## Entidades
 - `curricula`: versiones de malla, como identificador de plan y año de vigencia (futuro, recomendable prever).
 - `courses`: id, code, name, slug, kind(regular/elective), curricular_semester NULLABLE, elective_area_id NULLABLE, curriculum_id, description NULLABLE, status(active/archived). Restricciones y evolución multi-plan al final; una tabla puente será necesaria si el mismo ramo pertenece a varios planes.
@@ -7,7 +9,7 @@
 - `course_offerings`: id, course_id, academic_year, academic_term; UNIQUE(course_id, academic_year, academic_term). Edición del ramo en el periodo efectivamente dictado.
 - `materials`: id, offering_id, category enum(listado,apunte,certamen), document_number NULLABLE, title NULLABLE, original_filename, normalized_display_name, optional_section, optional_instructor, mime_verified, bytes, storage_object_key, status(pending/approved/rejected), uploaded_by, submitted_at, reviewed_at, reviewed_by, rejection_reason.
 - `profiles`: id ligado a auth.users, display_name, role(student/moderator/admin). Autorización servidor/RLS.
-- `favorites`: user_id, material_id; único por par.
+- `favorites`: user_id y destino exclusivo course_id/material_id; unicidad por usuario/destino, FK y RLS propias (detalle Hito 1.5 al final).
 - `reports`: id, material_id, reporter_id, reason, status, created_at, handled_by.
 - `moderation_events`: id, material_id, actor_id, action, notes, happened_at.
 - `course_creation_requests` y `course_request_review_events`: sugerencias de ramos y decisiones auditables futuras; no hay cola real en Hito 1.4.1.
@@ -190,4 +192,24 @@ Los parámetros se validan y enlazan; nunca concatenar texto del usuario. Las co
 4. Reglas de consistencia: pendiente sin revisor/fecha/resultado; aprobada con revisor, fecha y ramo resultante; rechazada con revisor/fecha y sin ramo resultante. Actor y fechas del evento los impone el servidor. No borrar eventos para ocultar decisiones.
 5. Antes de backend: autenticar cualquier correo verificado; validar entradas en servidor y limitar abuso; RLS en ramos/mutaciones, solicitudes/eventos y favoritos propios. Lectura de materiales exclusivamente aprobados para visitantes; originales pendientes/rechazados en Storage privado, acceso autorizado y URLs firmadas solo tras verificar permisos. Nunca service-role key en cliente.
 
-No hay adaptador de envío/revisión en Hito 1.4.1 ni solicitudes/actores simulados. Favoritos DEMO no son filas reales de `favorites`. Especificación de integración, límite HTTP de rutas locales y verificaciones pendientes: [HITO_1_4_1.md](HITO_1_4_1.md). Se mantiene la ampliación dentro del Hito 1.4; **no se inicia Hito 1.5**.
+No había adaptador de envío/revisión en Hito 1.4.1 ni solicitudes/actores simulados. Favoritos DEMO no son filas reales de `favorites`. Especificación histórica de integración y límite HTTP de rutas locales: [HITO_1_4_1.md](HITO_1_4_1.md).
+
+## Ampliación Hito 1.5 — demo, no backend
+
+Moderación tiene un estado separado del catálogo público y semillas sintéticas explícitas. Las decisiones pasan por dominio/servicio, no por setters de estado desde los componentes. Solo se resuelve desde `pending` hacia `approved` o `rejected`; el rechazo requiere explicación. Los eventos conservan recurso/tipo, estado anterior/nuevo, motivo, fecha y actor nullable; `null` significa ausencia de autenticación, no moderador autorizado. Corregir metadatos reutiliza las validaciones académicas, sin deducir periodo desde nombre original o fecha.
+
+En esta demo, aprobar un aporte **no** lo incorpora a `PublicCatalog` ni habilita archivo/ficha; aprobar una solicitud **no** crea un ramo. Una muestra usada para previsualizar es una muestra original ya pública, no bytes de un aporte pendiente. Los reportes referencian solo materiales aprobados; su resolución registra explicación/historial sin retirar ni modificar el documento. Recargar restablece decisiones, solicitudes y reportes.
+
+Favoritos utiliza `FavoriteReference { kind: 'course' | 'material', id }` y un puerto asíncrono `FavoritesService.list/setSaved`, sin recibir `userId`. El adaptador local es independiente de React, lee un esquema versionado y guarda solo referencias. Deduplica por tipo/ID, descarta desconocidos/no aprobados y no transforma referencias en autorización. Archivar/reclasificar un ramo no cambia su ID; sus favoritos continúan resolviéndose. Una referencia a un ramo local desaparecido al recargar se descarta con aviso. Fallos de acceso/lectura/escritura no impiden usar la selección en memoria. No hay sincronización en vivo entre pestañas ni entre dispositivos.
+
+### Requisitos para Supabase en un hito posterior autorizado
+
+- **Auth:** aceptar cualquier correo verificado; handlers obtienen la sesión verificada. Aportante/reportante/moderador/fechas/estado inicial se imponen en servidor. No leer roles desde localStorage, formulario, contexto React o metadata editable por usuario como autorización.
+- **PostgreSQL:** eventos append-only para materiales, solicitudes y reportes. Una revisión bloquea/compara estado y versión esperada, valida entradas y decide estado/evento en una transacción; rechazar segunda revisión con conflicto recuperable. IDs de operación/idempotencia evitan duplicación por reintentos. El servidor fija actor y reloj. Conservar correcciones académicas con antes/después auditables. La demo no ofrece concurrencia multiusuario.
+- **Solicitudes:** validación y duplicados por plan autorizado, incluyendo archivados. La futura publicación explícita del ramo requerirá transacción de creación, resultado y evento; no extrapolar que aprobar localmente ya crea catálogo. Registrar decisiones sobre coincidencias aproximadas, no fusionar silenciosamente.
+- **RLS:** lectura anónima exclusivamente de metadatos aprobados mediante allowlist pública. `pending/rejected` visibles solo según política del propietario/revisor; no consultas públicas por ID, facetas, búsquedas o conteos. Tablas de reportes/solicitudes/eventos restringidas al propietario y/o rol revisor comprobado; no exponer información personal del reportante. Mutaciones administrativas solo a personal autorizado. Probar políticas con visitante, usuario verificado, propietario y revisor, incluyendo IDs conocidos.
+- **Favoritos:** `user_id` FK a usuario y exactamente uno de `course_id`/`material_id` mediante CHECK, ambas FK restrictivas; índices únicos parciales `(user_id,course_id)` y `(user_id,material_id)`. RLS propia para SELECT/INSERT/DELETE con `auth.uid() = user_id`; insertar favorito de material requiere aprobación y relación pública válida. La consulta JOIN vuelve a verificar visibilidad si el material fue retirado. No aceptar autor arbitrario ni tratar el favorito como permiso de descarga. Migrar locales solo con consentimiento y revalidación, no sincronizarlos automáticamente hacia cuentas.
+- **Storage privado:** nunca subir pendientes/rechazados a `public/` ni buckets públicos. Verificar sesión/rol/propiedad/estado antes de acceso o URL firmada de vida corta. Validar tamaño, firma/formato/contenido y autorización legal en servidor; MIME/extensión no bastan. La transición a aprobado no debe generar una URL pública accidental; políticas deben permitir revocación futura. No exponer claves service-role ni rutas internas al cliente.
+- **Reportes y abuso:** validar motivo/descripción y material público en servidor, límites de frecuencia/tamaño y política de retención. Resolución y eventual retiro de material son operaciones distintas, explícitas, autorizadas y auditadas; requieren confirmación, no efectos laterales desde un reporte local.
+
+Estos son requisitos/documentación de integración, **no migraciones aplicadas, conexión Supabase ni garantías de protección de la demo pública**.

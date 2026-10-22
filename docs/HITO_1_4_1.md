@@ -1,5 +1,7 @@
 # Hito 1.4.1 — Electivos, gestión y favoritos DEMO
 
+> Documento histórico. El Hito 1.5 está autorizado y amplía moderación/reportes y favoritos persistidos en este navegador; ver [HITO_1_5.md](HITO_1_5.md). Las notas de solo memoria/no autorización de favoritos describen 1.4.1, no el comportamiento vigente.
+
 ## Alcance vigente
 
 Ampliación del **Hito 1.4**, no inicio del Hito 1.5. Catálogo ficticio, sin representar la malla oficial de la UdeC. Incluye electivos por área, gestión local de asignaturas y favoritos de demostración integrados con la navegación existente. Se conserva el formulario de aportes del [Hito 1.4](HITO_1_4.md), el lector y las descargas de muestras originales autorizadas del [Hito 1.3](HITO_1_3.md).

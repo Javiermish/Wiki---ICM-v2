@@ -18,7 +18,7 @@ export default function CourseManagementPage() {
       <div className="mt-5 space-y-2 rounded-xl border border-border bg-secondary p-5 text-sm text-secondary-foreground">
         <p className="font-semibold">Ruta pública y no segura: no es una administración real.</p>
         <p>No requiere iniciar sesión. Los cambios solo viven en memoria en esta pestaña durante la navegación; al recargar o cerrarla se pierden. No afectan a otros usuarios ni modifican documentos.</p>
-        <p>Próximamente: solicitudes reales para usuarios registrados, con revisión humana. Esta demo no envía solicitudes ni simula una revisión real.</p>
+        <p>Puedes practicar solicitudes y su revisión en la cola DEMO de Moderación. No se envían a nadie ni crean ramos al aprobarlas. Solicitudes reales para usuarios registrados y revisión humana: próximamente.</p>
       </div>
     </header>
     <CourseManager />

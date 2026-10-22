@@ -13,8 +13,8 @@ Tipografía sans legible para UI; titulares claros y jerarquía 32-48/24/18/14 p
 3. `/ramos/[slug]`: ficha de ramo, tabs `Listados | Apuntes | Certámenes`, filtros Año y Periodo académico, tarjetas con número y fecha.
 4. `/materiales/[id]`: en Hito 1.3 autorizado, cabecera, breadcrumbs, lector PDF/imagen real y descarga de archivos originales de demostración; ficha sin archivo muestra disponibilidad explicativa, nunca un visor ficticio.
 5. `/aportar`: diseño de formulario con ramo, categoría, número, año, semestre académico, archivos y aviso de moderación.
-6. `/moderacion`: prototipo restringido simulado con cola de revisión; ruta real requerirá autorización servidor.
-7. `/favoritos`: en Hito 1.4.1, selección DEMO de materiales aprobados solo en memoria; añadir/quitar sin falsa sesión. El guardado real en cuenta requerirá login futuro.
+6. `/moderacion`: demo pública sin protección real; tres colas de aportes, solicitudes y reportes, con filtros, consulta, corrección, confirmaciones e historial. La versión real requerirá autorización servidor.
+7. `/favoritos`: selección DEMO de asignaturas y documentos aprobados, agrupados, con persistencia local defensiva desde Hito 1.5; añadir/quitar sin falsa sesión. El guardado en cuenta requerirá login futuro.
 8. `/electivos`: exploración por área, búsqueda y estados vacíos; `?area=…` conserva la selección compartible.
 9. `/gestion/asignaturas`: gestión pública DEMO de ramos, sin permisos reales ni backend; consulta, creación, edición, reclasificación y archivo reversible.
 
@@ -47,6 +47,8 @@ Capturas a 375, 768, 1280 y 1440px; modo claro/oscuro; keyboard tab; foco; contr
 - Acción final explícitamente simulada; nunca mensajes de recepción, publicación ni pendientes reales. El formulario no persiste al recargar.
 
 ## Electivos, gestión y favoritos Hito 1.4.1
+
+Descripción histórica: Hito 1.5 sustituye únicamente la política de favoritos en memoria por referencias locales persistidas. Gestión y moderación siguen en memoria; ver [HITO_1_5.md](HITO_1_5.md).
 
 - Mantener la biblioteca como lenguaje principal, no convertir el sitio completo en un dashboard. Electivos distingue cinco áreas ilustrativas (Numérico, Discreta, Optimización, Estadística y Otro) con títulos, contador y vacío útil. Un electivo no se ubica artificialmente en un semestre de malla; su breadcrumb vuelve a `/electivos?area=…`.
 - Todas las fichas conservan las tres categorías, incluso con cero documentos; las categorías no se ocultan por ausencia de materiales.

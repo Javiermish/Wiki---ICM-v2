@@ -216,14 +216,15 @@ try {
     assert.equal(await tab.evaluate("window.__qaDocument"), marker);
   });
 
-  await check("Another tab has isolated courses and empty favorites without resetting the first tab", async () => {
+  await check("Another tab has isolated courses and reads persisted approved favorites", async () => {
     const other = await browser.createTab();
     try {
       await other.navigate(management); await other.theme(true); await other.theme(false);
       assert.ok(!await other.evaluate(`document.querySelector('main').innerText.includes(${text(editedName)}) || document.querySelector('main').innerText.includes(${text(renamedCalculus)})`));
       assert.ok(await other.evaluate(`!!document.querySelector('button[aria-label="Editar Cálculo I"]')`));
       await other.navigate("/favoritos");
-      assert.equal(await other.evaluate(`${cards}.length`), 0);
+      await other.wait(`${cards}.length===1`, "persisted favorite loaded");
+      assert.ok(await other.evaluate(`${cards}[0].innerText.includes('Cálculo I')`));
       await link("/favoritos"); assert.equal(await tab.evaluate(`${cards}.length`), 1);
       await manager(); assert.equal((await identity(editedName)).id, localCourse.id);
     } finally { await other.close(); }
@@ -245,15 +246,15 @@ try {
     const remove = 'main button[aria-label^="Quitar "][aria-label$="favoritos de demo"]';
     await tab.focus(remove); await tab.press("Enter");
     await tab.wait(`${cards}.length===0 && document.activeElement?.id==='favorites-list-heading'`, "removed favorite returns focus to list heading");
-    // Restore a favorite to verify it disappears after reload, not merely after removal.
+    // Restore a favorite to verify persistence survives reload (Hito 1.5).
     await link("/");
     await tab.click('main button[aria-label^="Guardar Certamen 2 - 2024-2"][aria-label*="Sección 1 "]');
     await link("/favoritos"); await tab.wait(`${cards}.length===1`);
   });
 
-  await check("Reload discards local courses, classification changes and favorites", async () => {
+  await check("Reload discards local courses and classification changes but preserves favorites", async () => {
     await tab.call("Page.reload");
-    await tab.wait(`document.readyState==='complete' && !!document.querySelector('#favorites-list-heading')?.getClientRects().length && ${cards}.length===0`);
+    await tab.wait(`document.readyState==='complete' && !!document.querySelector('#favorites-list-heading')?.getClientRects().length && ${cards}.length===1`);
     assert.notEqual(await tab.evaluate("window.__qaDocument"), marker);
     await tab.navigate(management);
     assert.ok(!await tab.evaluate(`document.querySelector('main').innerText.includes(${text(editedName)})`));

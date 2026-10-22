@@ -5,7 +5,7 @@ import test from "node:test";
 // Read-only requests to the coordinator's server; no server/build lifecycle.
 const base = process.env.WIKI_TEST_BASE_URL;
 const privateMarkers = ["MARCADOR_PRIVADO", "demo-pending-calculo", "demo-rejected-calculo", "privado-pendiente.pdf", "privado-rechazado.pdf", "originalFilename", "submittedAt"];
-const newRoutes = ["/gestion/asignaturas", "/electivos", "/favoritos", "/semestres/5"];
+const newRoutes = ["/gestion/asignaturas", "/electivos", "/favoritos", "/semestres/5", "/moderacion"];
 
 async function request(path, options = {}) {
   assert.ok(["127.0.0.1", "localhost", "[::1]"].includes(new URL(base).hostname), "Only an existing loopback fixture server is allowed");
@@ -96,7 +96,7 @@ test("catálogo editable y favoritos: contratos HTTP de la demostración públic
     assert.equal((calculus.match(/<article\b/g) ?? []).length, 5);
   });
 
-  await t.test("las cuatro rutas nuevas y ficha de material no filtran privados en HTML, RSC o JS", async () => {
+  await t.test("las rutas nuevas y ficha de material no filtran privados en HTML, RSC o JS", async () => {
     const scripts = new Set();
     for (const path of [...newRoutes, "/materiales/demo-certamen-calculo-2"]) {
       const html = await page(path);

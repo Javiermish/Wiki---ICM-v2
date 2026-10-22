@@ -89,3 +89,37 @@ Antes de declarar un hito terminado:
 Si una operación potencialmente destructiva es necesaria, no la ejecutes automáticamente. Explica por qué se necesita y solicita autorización.
 
 **Principio general:** máxima autonomía para desarrollar y probar; el usuario conserva el control de Git, las publicaciones y las operaciones destructivas.
+
+## Superpowers y Ponytail — Reglas para Wiki ICM
+
+Utiliza las skills de Superpowers y Ponytail cuando aporten valor al trabajo solicitado.
+
+### Superpowers
+
+- Prioriza depuración sistemática, pruebas, revisión de código y verificación antes de finalizar.
+- Para funcionalidades ya planificadas y aprobadas, evita repetir innecesariamente el proceso de planificación.
+- Prefiere ejecución directa de planes cuando sea suficiente, en lugar de crear múltiples subagentes para tareas pequeñas.
+- No crees ramas, worktrees, commits o pull requests sin autorización explícita del usuario.
+- No solicites aprobación intermedia para decisiones técnicas menores dentro de un hito aprobado.
+- Conserva los agentes especializados y las skills existentes de Wiki ICM.
+
+### Ponytail
+
+- Utiliza preferentemente el modo lite.
+- Reutiliza componentes y funciones existentes antes de crear nuevos.
+- Evita dependencias, abstracciones y archivos innecesarios.
+- No sacrifiques seguridad, accesibilidad, validaciones ni pruebas para reducir código o tokens.
+- Evita leer archivos grandes o repetir análisis completos cuando el contexto necesario ya esté disponible.
+
+### Gestión de recursos
+
+- Trabaja únicamente en el hito solicitado.
+- No ejecutes pruebas pesadas repetidamente si nada relevante ha cambiado.
+- Utiliza subagentes cuando la especialización justifique su coste.
+- Entrega un resumen final conciso con los cambios, pruebas y limitaciones.
+
+### Control de Git
+
+- Nunca ejecutes git commit ni git push sin autorización expresa.
+- No reescribas el historial.
+- Deja los cambios sin commit para revisión manual del usuario.

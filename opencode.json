@@ -1,8 +1,10 @@
-
-
 {
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "build",
+  "plugins": [
+        "superpowers@git+https://github.com/obra/superpowers.git",
+        "@dietrichgebert/ponytail"
+  ],
   "permissions": [
     {
       "action": "*",

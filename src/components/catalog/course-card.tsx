@@ -6,6 +6,7 @@ import { courseHref } from "@/lib/catalog/course-filters";
 import { categoryLabels } from "@/lib/catalog/query";
 import { courseClassification } from "@/lib/catalog/query";
 import { useCourseCatalog } from "./course-catalog-provider";
+import { FavoriteButton } from "./favorite-button";
 
 export function CourseCard({ course, counts }: { course: Course; counts: Record<MaterialCategory, number> }) {
   const { catalog } = useCourseCatalog();
@@ -20,6 +21,7 @@ export function CourseCard({ course, counts }: { course: Course; counts: Record<
         ))}
       </ul>
       <p className="mt-2 text-xs text-muted-foreground">Recuentos de materiales aprobados ficticios.</p>
+      <div className="mt-4"><FavoriteButton courseId={course.id} courseName={course.name} /></div>
     </article>
   );
 }

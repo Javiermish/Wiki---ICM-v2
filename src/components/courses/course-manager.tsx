@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useCourseCatalog } from "@/components/catalog/course-catalog-provider";
 import { buttonVariants as buttonStyles } from "@/components/ui/button";
 import type { Catalog, Course } from "@/domain/catalog";
-import { courseInputLimits, CourseValidationError, validateCourseInput, type CourseInput } from "@/domain/course-management";
+import { CourseValidationError, validateCourseInput, type CourseInput } from "@/domain/course-management";
 import { categoryLabels, courseMaterials, normalizeSearch } from "@/lib/catalog/query";
+import { CourseInputFields } from "./course-input-fields";
+import { useModeration } from "@/components/moderation/moderation-provider";
 
 type FieldErrors = Partial<Record<keyof CourseInput, string>>;
 const emptyInput: CourseInput = {
@@ -31,17 +33,6 @@ function courseLocation(course: Course, catalog: Catalog): string {
     : `Electivo · ${catalog.electiveAreas.find((area) => area.id === course.electiveAreaId)?.name ?? "Área no disponible"}`;
 }
 
-function CourseField({ name, label, error, hint, optional = false, children }: {
-  name: keyof CourseInput; label: string; error?: string; hint?: string; optional?: boolean; children: ReactNode;
-}) {
-  return <div className="min-w-0">
-    <label htmlFor={`course-${name}`} className="mb-2 block text-sm font-semibold">{label}{optional ? <span className="font-normal text-muted-foreground"> (opcional)</span> : null}</label>
-    {hint ? <p id={`course-${name}-hint`} className="mb-2 text-sm text-muted-foreground">{hint}</p> : null}
-    {children}
-    {error ? <p id={`course-${name}-error`} className="mt-2 text-sm font-medium text-destructive">{error}</p> : null}
-  </div>;
-}
-
 function CourseDetails({ course, catalog }: { course: Course; catalog: Catalog }) {
   const materials = courseMaterials(catalog, course.id);
   return <details className="mt-4 border-t border-border pt-3">
@@ -63,6 +54,8 @@ function CourseDetails({ course, catalog }: { course: Course; catalog: Catalog }
 
 export function CourseManager() {
   const { catalog, createCourse, updateCourse, setCourseArchived } = useCourseCatalog();
+  const { service: moderation } = useModeration();
+  const [formMode, setFormMode] = useState<"create" | "request">("create");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -130,17 +123,6 @@ export function CourseManager() {
     setNotice("");
   }
 
-  function fieldProps(name: keyof CourseInput, hint = false) {
-    return {
-      id: `course-${name}`,
-      name,
-      value: input[name],
-      className: "field form-control",
-      "aria-invalid": Boolean(errors[name]),
-      "aria-describedby": [hint ? `course-${name}-hint` : "", errors[name] ? `course-${name}-error` : ""].filter(Boolean).join(" ") || undefined,
-    };
-  }
-
   async function saveCourse(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!interactive || operationInFlight.current) return;
@@ -156,8 +138,13 @@ export function CourseManager() {
     operationInFlight.current = true;
     setBusy("save");
     try {
-      const course = editingId ? await updateCourse(editingId, input) : await createCourse(input);
-      setNotice(`${editingId ? "Cambios aplicados" : "Ramo creado"} solo en esta demo: ${course.name}. No se guardaron en un servidor; se perderán al recargar.`);
+      if (!editingId && formMode === "request") {
+        const request = await moderation.submitCourseRequest(input);
+        setNotice(`Solicitud DEMO añadida a la cola local: ${request.proposedCourse.name}. Puedes revisarla en Moderación. No crea un ramo, no se envía a un servidor y se pierde al recargar.`);
+      } else {
+        const course = editingId ? await updateCourse(editingId, input) : await createCourse(input);
+        setNotice(`${editingId ? "Cambios aplicados" : "Ramo creado"} solo en esta demo: ${course.name}. No se guardaron en un servidor; se perderán al recargar.`);
+      }
       setEditingId(null);
       setInput({ ...emptyInput });
       setRejectedDuplicates([]);
@@ -204,7 +191,7 @@ export function CourseManager() {
       <p className="text-sm text-muted-foreground">{catalog.courses.length} ramos de demostración, incluidos los archivados.</p>
       <a href="#course-form" aria-disabled={controlsDisabled} tabIndex={controlsDisabled ? -1 : undefined} className={buttonStyles({ className: "min-h-11 px-4 aria-disabled:opacity-50" })} onClick={(event) => { event.preventDefault(); openForm(); }}>Crear asignatura de demo</a>
     </div>
-    <div ref={noticeControl} role="status" tabIndex={-1} className={notice ? "rounded-xl border border-primary bg-secondary p-5 text-sm text-secondary-foreground" : "sr-only"}>{notice}</div>
+    <div ref={noticeControl} role="status" tabIndex={-1} className={notice ? "rounded-xl border border-primary bg-secondary p-5 text-sm text-secondary-foreground" : "sr-only"}>{notice}{notice && formMode === "request" ? <Link href="/moderacion#solicitudes" className="text-link mt-2 flex min-h-11 items-center">Consultar solicitudes de la demo</Link> : null}</div>
 
     <section aria-labelledby="course-list-heading" className="space-y-5">
       <h2 id="course-list-heading" className="text-2xl font-semibold">Consultar asignaturas</h2>
@@ -234,27 +221,22 @@ export function CourseManager() {
 
     <section id="course-form" aria-labelledby="course-form-heading" className="rounded-xl border border-border bg-card p-5 sm:p-8">
       <h2 id="course-form-heading" className="text-2xl font-semibold">{editingCourse ? `Editar: ${editingCourse.name}` : "Crear asignatura de demostración"}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">Solo modifica el catálogo temporal de esta pestaña. No publica asignaturas oficiales ni envía una solicitud.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Crea directamente un ejemplo local o prepara una solicitud DEMO para revisar en Moderación. Ninguna opción publica asignaturas oficiales ni envía datos a un servidor.</p>
       {editingCourse ? <p className="mt-3 text-sm [overflow-wrap:anywhere]">ID: <span className="font-mono">{editingCourse.id}</span> · Ruta: /ramos/{editingCourse.slug}. Ambos se conservan y no son editables.</p> : null}
       <form noValidate onSubmit={saveCourse} aria-busy={busy === "save"} aria-labelledby="course-form-heading" className="mt-6 space-y-6">
+        {!editingCourse ? <fieldset className="flex flex-wrap gap-4"><legend className="mb-2 text-sm font-semibold">Acción de demostración</legend><label className="inline-flex min-h-11 items-center gap-2"><input type="radio" name="course-demo-action" checked={formMode === "create"} onChange={() => setFormMode("create")} />Crear en catálogo local</label><label className="inline-flex min-h-11 items-center gap-2"><input type="radio" name="course-demo-action" checked={formMode === "request"} onChange={() => setFormMode("request")} />Solicitar revisión DEMO (no crea ramo)</label></fieldset> : null}
         {errorEntries.length || formError ? <div ref={summary} tabIndex={-1} role="alert" aria-labelledby="course-errors-heading" className="rounded-xl border border-destructive p-5">
           <h3 id="course-errors-heading" className="font-semibold text-destructive">Revisa los datos de la asignatura</h3>
           {formError ? <p className="mt-2 text-sm">{formError}</p> : null}
           <ul className="mt-2 list-inside list-disc text-sm">{errorEntries.map(([field, message]) => <li key={field}><a href={`#course-${field}`} className="text-link inline-block min-h-11 py-2" onClick={(event) => { event.preventDefault(); document.getElementById(`course-${field}`)?.focus(); }}>{message}</a></li>)}</ul>
         </div> : null}
-        <div className="grid gap-6 sm:grid-cols-2">
-          <CourseField name="name" label="Nombre de la asignatura" error={errors.name}><input {...fieldProps("name")} ref={nameControl} required maxLength={courseInputLimits.name} onChange={(event) => updateField("name", event.target.value)} /></CourseField>
-          <CourseField name="code" label="Código" optional error={errors.code}><input {...fieldProps("code")} maxLength={courseInputLimits.code} onChange={(event) => updateField("code", event.target.value)} /></CourseField>
-          <CourseField name="kind" label="Tipo de asignatura" error={errors.kind}><select {...fieldProps("kind")} required onChange={(event) => updateField("kind", event.target.value === "elective" ? "elective" : "regular")}><option value="regular">Regular</option><option value="elective">Electivo</option></select></CourseField>
-          {input.kind === "regular" ? <CourseField name="curricularSemester" label="Semestre curricular" hint="Ubicación en la malla (1 a 12), no el período académico de los materiales." error={errors.curricularSemester}><select {...fieldProps("curricularSemester", true)} required onChange={(event) => updateField("curricularSemester", event.target.value)}><option value="">Selecciona un semestre</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={String(index + 1)}>Semestre {index + 1}</option>)}</select></CourseField> : <CourseField name="electiveAreaId" label="Área del electivo" hint="Los electivos se organizan por área, sin semestre curricular." error={errors.electiveAreaId}><select {...fieldProps("electiveAreaId", true)} required onChange={(event) => updateField("electiveAreaId", event.target.value)}><option value="">Selecciona un área</option>{catalog.electiveAreas.map((area) => <option key={area.id} value={area.id}>{area.name}</option>)}</select></CourseField>}
-          <div className="sm:col-span-2"><CourseField name="description" label="Descripción" optional error={errors.description}><textarea {...fieldProps("description")} rows={4} maxLength={courseInputLimits.description} onChange={(event) => updateField("description", event.target.value)} /></CourseField></div>
-        </div>
+        <CourseInputFields input={input} errors={errors} areas={catalog.electiveAreas} onChange={updateField} nameRef={nameControl} />
         {duplicates.length ? <aside aria-labelledby="course-duplicates-heading" className="rounded-xl border border-border bg-muted p-5">
           <h3 id="course-duplicates-heading" className="font-semibold">Posibles duplicados: comprueba el catálogo</h3>
           <p className="mt-2 text-sm">Estas coincidencias incluyen ramos archivados. Las coincidencias exactas que detecte la validación impiden guardar; las demás son una advertencia local, no una revisión humana.</p>
-          <ul className="mt-3 space-y-2 text-sm">{duplicates.map((course) => <li key={course.id}><Link className="text-link inline-flex min-h-11 items-center" href={`/ramos/${course.slug}`}>{course.name}{course.code ? ` · ${course.code}` : ""} · {course.status === "archived" ? "Archivado" : "Activo"}</Link><span className="block text-muted-foreground">{courseLocation(course, catalog)} · ID: {course.id}</span></li>)}</ul>
+          <ul className="mt-3 space-y-2 text-sm">{duplicates.map((course) => <li key={course.id}>{catalog.courses.some((entry) => entry.id === course.id) ? <Link className="text-link inline-flex min-h-11 items-center" href={`/ramos/${course.slug}`}>{course.name}{course.code ? ` · ${course.code}` : ""} · {course.status === "archived" ? "Archivado" : "Activo"}</Link> : <Link href="/moderacion#solicitudes" className="text-link inline-flex min-h-11 items-center">Solicitud DEMO reservada: {course.name}{course.code ? ` · ${course.code}` : ""}</Link>}<span className="block text-muted-foreground">{courseLocation(course, catalog)} · ID: {course.id}</span></li>)}</ul>
         </aside> : null}
-        <div className="flex flex-wrap gap-3"><button type="submit" disabled={controlsDisabled} className={buttonStyles({ className: "min-h-11 px-5" })}>{busy === "save" ? "Aplicando cambios…" : editingCourse ? "Aplicar cambios en la demo" : "Crear en la demo"}</button>{editingId ? <button type="button" className={buttonStyles({ variant: "outline", className: "min-h-11 px-4" })} onClick={() => openForm()}>Cancelar edición</button> : null}</div>
+        <div className="flex flex-wrap gap-3"><button type="submit" disabled={controlsDisabled} className={buttonStyles({ className: "min-h-11 px-5" })}>{busy === "save" ? "Aplicando cambios…" : editingCourse ? "Aplicar cambios en la demo" : formMode === "request" ? "Añadir solicitud a cola DEMO" : "Crear en la demo"}</button>{editingId ? <button type="button" className={buttonStyles({ variant: "outline", className: "min-h-11 px-4" })} onClick={() => openForm()}>Cancelar edición</button> : null}</div>
         <p className="text-sm text-muted-foreground">Solo memoria: no se envían datos, no hay revisión real y se pierde todo cambio al recargar.</p>
       </form>
     </section>
