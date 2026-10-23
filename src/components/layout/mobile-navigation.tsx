@@ -4,13 +4,16 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 type NavigationLink = Readonly<{ href: string; label: string }>;
 
 export function MobileNavigation({
   links,
+  signedIn = false,
 }: {
   links: readonly NavigationLink[];
+  signedIn?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const navigationId = useId();
@@ -43,7 +46,7 @@ export function MobileNavigation({
 
   return (
     <div
-      className="lg:hidden"
+      className="xl:hidden"
       onKeyDown={(event) => {
         if (event.key === "Escape" && isOpen) {
           event.preventDefault();
@@ -99,6 +102,7 @@ export function MobileNavigation({
               </Link>
             </li>
           ))}
+          {signedIn && <li><LogoutButton /></li>}
         </ul>
       </nav>
     </div>

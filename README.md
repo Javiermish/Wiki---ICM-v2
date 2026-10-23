@@ -1,4 +1,4 @@
-# Wiki ICM — Hito 1.5
+# Wiki ICM — Hito 2.1
 
 Catálogo navegable de una biblioteca colaborativa de Ingeniería Civil Matemática.
 **Prototipo con datos ficticios: los ramos no representan la malla oficial de la UdeC.**
@@ -13,7 +13,10 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Abrir <http://localhost:3000>. No requiere variables de entorno ni credenciales.
+Abrir <http://localhost:3000>. El catálogo público funciona sin credenciales.
+Las cuentas reales requieren Supabase y las variables de `.env.example`.
+Configuración de correo, migraciones, administrador inicial y pruebas: [docs/HITO_2_1.md](docs/HITO_2_1.md).
+Si Auth funciona pero faltan perfiles/roles, aplicar manualmente `supabase/migrations/202610220001_profiles_roles.sql` una sola vez y después `202610220002_backfill_existing_accounts.sql` (reejecutable). Orden, precauciones y consultas de verificación: [docs/AUTH_SQL.md](docs/AUTH_SQL.md). No borrar ni registrar de nuevo la cuenta existente.
 Las fuentes son locales del sistema; no se descargan fuentes de Google.
 
 Para comprobar producción:
@@ -43,7 +46,7 @@ WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node te
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-contributions.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-courses.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-favorites.mjs
-WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-moderation.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-auth.mjs
 ```
 
 Capturas e informes locales en `.next/qa-evidence/`, `.next/qa-materials-evidence/`,
@@ -65,9 +68,12 @@ visor no desactivan el sandbox si Chromium está bloqueado por el entorno.
 - `/favoritos`: asignaturas regulares/electivas y materiales aprobados agrupados,
   con añadir/quitar y persistencia defensiva en este navegador;
   no es un guardado en una cuenta ni una autenticación simulada.
-- `/moderacion`: demo pública de revisión de aportes, solicitudes de asignaturas
+- `/moderacion`: revisión DEMO protegida para moderadores/administradores verificados, de aportes, solicitudes de asignaturas
   y reportes. Correcciones, decisiones confirmadas e historial solo en memoria;
   aprobar no publica archivos ni incorpora ramos al catálogo.
+- `/registro`, `/login`, `/recuperar-contrasena`, `/restablecer-contrasena`, `/auth/confirm`: Supabase Auth SSR, correo confirmado y contraseña.
+- `/mi-cuenta`: perfil propio editable; `/mis-aportes` informa la funcionalidad futura.
+- `/admin/usuarios`: consulta y asignación/revocación de moderación con auditoría; autorización servidor y SQL.
 - `/ramos/[slug]`: ficha del ramo, breadcrumbs, Listados, Apuntes y Certámenes;
   filtros combinables por año, semestre académico y número, conservados en URL.
 - Múltiples secciones/versiones del mismo documento con identificadores únicos;
@@ -168,6 +174,11 @@ src/lib/catalog/         Consulta, allowlist pública, repositorio DEMO y filtro
 src/lib/materials/       Fuente de archivos solo servidor, nombres y navegación
 src/lib/favorites/       Adaptador de favoritos locales versionados y recuperables
 src/lib/moderation/      Servicio de revisión DEMO sin publicación
+src/lib/auth/            Sesión verificada, acciones y flujos de cuentas reales
+src/lib/supabase/        Clientes browser/SSR y configuración pública
+src/proxy.ts             Renovación de sesión y cabeceras no-store
+supabase/migrations/     Perfiles, roles, RLS y auditoría (aplicación manual)
+supabase/tests/          Pruebas SQL transaccionales
 src/lib/theme.ts         Preferencia y script inicial del tema
 public/demo/             Muestras originales intencionalmente públicas
 scripts/                 Preparación PDF.js y generación opcional de muestras
@@ -175,7 +186,8 @@ tests/                   node:test y navegador Chromium vía CDP
 ```
 
 Hay aportes preparados localmente, electivos, gestión y favoritos DEMO; no hay
-moderación, Supabase, autenticación, DB, Storage, subida ni publicación reales.
+moderación de contenido, subida ni publicación reales. Autenticación, perfiles y roles
+usan Supabase real una vez configuradas variables, migración y correo.
 La gestión abierta no tiene permisos efectivos ni representa una administración segura.
 Solicitudes y reportes alimentan únicamente una cola DEMO en memoria, sin envío ni
 revisión real. Las funciones futuras se señalan como
@@ -198,10 +210,12 @@ El kit original y su mockup estático se conservan en `README_HITO1.md` y
 [`docs/HITO_1_3.md`](docs/HITO_1_3.md) (lector, seguridad, pruebas y límites) y
 [`docs/HITO_1_4.md`](docs/HITO_1_4.md) (aportes locales y contratos futuros, histórico) y
 [`docs/HITO_1_4_1.md`](docs/HITO_1_4_1.md) (histórico: electivos y gestión) y
-[`docs/HITO_1_5.md`](docs/HITO_1_5.md) (alcance vigente, pruebas y límites).
+[`docs/HITO_1_5.md`](docs/HITO_1_5.md) (histórico) y
+[`docs/HITO_2_1.md`](docs/HITO_2_1.md) (alcance vigente, configuración y límites).
 Restricciones/consultas DB recomendadas y revisión transaccional futura en
 [`docs/MODELO_DOMINIO.md`](docs/MODELO_DOMINIO.md); son diseño, no migraciones aplicadas.
-**No se inicia Hito 2.1 ni se conecta Supabase.**
+Solo cuentas tienen migración implementada; no se han aplicado migraciones remotas.
+No se inicia Hito 2.2. Los archivos futuros usarán Cloudflare R2, no Supabase Storage.
 
 ## Dependencias del lector
 

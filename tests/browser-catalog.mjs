@@ -103,7 +103,8 @@ async function navigate(path) {
   assert.ok(!errorText, errorText);
   await wait(`document.readyState === 'complete' && !![...document.querySelectorAll('main')].find(e => e.getClientRects().length > 0 && e.getAttribute('aria-busy') !== 'true' && e.querySelector('h1'))`, `page ready ${path}`);
   await evaluate('document.fonts.ready.then(() => true)');
-  await sleep(150);
+  // Header SSR fallback can look complete before React installs click/keyboard handlers.
+  await wait(`(()=>{const buttons=[...document.querySelectorAll('button[aria-label="Tema oscuro"]')];const e=buttons[0];return buttons.length===1 && e.getClientRects().length && Object.keys(e).some(k=>k.startsWith('__reactProps$')&&typeof e[k].onClick==='function') && ![...document.querySelectorAll('[hidden][id]')].some(e=>e.id.startsWith('S:')) && e.getAttribute('aria-pressed')===String(document.documentElement.classList.contains('dark'))})()`, 'unique hydrated header and settled Suspense');
 }
 async function press(key, modifiers = 0) {
   const codes = { Tab: 9, Enter: 13, Escape: 27, Home: 36, End: 35, ArrowDown: 40, ArrowUp: 38, ' ': 32 };
@@ -279,7 +280,7 @@ try {
     await navigate('/semestres/4');
     assert.ok(await evaluate(`${visibleCards}.length===0 && document.querySelector('main')?.innerText.includes('no hay ramos de ejemplo')`));
     await navigate('/ramos/geometria?tipo=certamenes');
-    assert.ok(await evaluate(`document.querySelectorAll('nav[aria-label="Categorías de materiales"] a').length===3 && ${visibleCards}.length===0`));
+    assert.ok(await evaluate(`[...document.querySelectorAll('nav[aria-label="Categorías de materiales"] a')].filter(e=>e.getClientRects().length>0).length===3 && ${visibleCards}.length===0`));
     await navigate('/?q=MARCADOR_PRIVADO');
     assert.equal(await evaluate(`${visibleCards}.length`), 0);
   });

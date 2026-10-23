@@ -4,16 +4,17 @@ import test from "node:test";
 const base = process.env.WIKI_TEST_BASE_URL;
 const privateMarkers = ["MARCADOR_PRIVADO", "demo-pending-calculo", "demo-rejected-calculo", "privado-pendiente.pdf", "privado-rechazado.pdf", "originalFilename", "submittedAt"];
 
-test("moderación HTTP es demo pública, tres colas aisladas y ningún endpoint público para sus IDs", { skip: !base }, async (t) => {
+test("moderación HTTP requiere sesión autorizada y no expone IDs de revisión", { skip: !base }, async (t) => {
   const request = (path, headers) => fetch(new URL(path, base), { headers, redirect: "manual", signal: AbortSignal.timeout(20000) });
-  await t.test("ruta, formularios progresivos y aislamiento HTML/chunks", async () => {
+  await t.test("acceso directo anónimo bloqueado, sin colas serializadas", async () => {
     const response = await request("/moderacion");
-    assert.equal(response.status, 200);
+    assert.ok([200, 307].includes(response.status));
+    assert.match(response.headers.get("cache-control"), /private.*no-store/);
     const html = await response.text();
-    for (const text of ["Demostración pública", "sin backend", "sin login", "se pierden al recargar", "no publica", 'id="materiales-revision"', 'id="solicitudes"', 'id="reportes"']) assert.ok(html.toLowerCase().includes(text.toLowerCase()), text);
-    assert.match(html, /<fieldset\b[^>]*\bdisabled/);
-    assert.match(html, /<noscript/);
-    assert.match(html, /noindex, nofollow/);
+    // Cache Components can stream the public shell before the server redirect.
+    if (response.status === 307) assert.equal(new URL(response.headers.get("location"), base).pathname, "/login");
+    else assert.match(html, /id="__next-page-redirect"[^>]*content="1;url=\/login\?next=%2Fmoderacion"/);
+    for (const marker of ['id="materiales-revision"', 'id="solicitudes"', 'id="reportes"']) assert.ok(!html.includes(marker));
     for (const marker of privateMarkers) assert.ok(!html.includes(marker), marker);
     assert.ok(!/<a[^>]+href="\/materiales\/synthetic-/i.test(html));
     const scripts = new Set([...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((match) => match[1].replaceAll("&amp;", "&")));

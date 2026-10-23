@@ -28,7 +28,7 @@ async function navigate(path) {
 }
 async function link(path) {
   await tab.click(`a[href=${text(path)}]`);
-  await tab.wait(`location.pathname===${text(path)} && !!document.querySelector('main h1')`, `client navigation ${path}`);
+  await tab.wait(`location.pathname===${text(path)} && [...document.querySelectorAll('main')].some(e=>e.getClientRects().length && e.getAttribute('aria-busy')!=='true' && e.querySelector('h1'))`, `client navigation ${path}`);
 }
 const save = name => `button[aria-label=${text(`Guardar ${name} en favoritos de demo`)}]`;
 
@@ -43,7 +43,7 @@ try {
     await tab.click(save("Cálculo I"));
     await tab.wait(`!!document.querySelector('button[aria-pressed="true"][aria-label*="Cálculo I"]')`);
     await link("/electivos");
-    await tab.wait(`!!document.querySelector('main article button[aria-label^="Guardar "]:not([disabled])')`);
+    await tab.wait(`[...document.querySelectorAll('main article button[aria-label^="Guardar "]:not([disabled])')].some(e=>e.getClientRects().length)`);
     await tab.click('main article button[aria-label^="Guardar "]');
     const data = await tab.evaluate(`JSON.parse(localStorage.getItem(${text(key)}))`);
     assert.equal(data.version, 1);

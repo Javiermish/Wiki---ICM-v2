@@ -1,5 +1,7 @@
 # Wiki ICM — Dirección visual y arquitectura de interfaz
 
+> **Ampliación Hito 2.1:** formularios de registro/login/recuperación/restablecimiento, cuenta y usuarios usan el sistema existente. Cabecera distingue visitante, estudiante, moderador y admin a partir de sesión verificada en servidor. `/moderacion` deja de ser pública, sin convertir su workspace DEMO en moderación real. Favoritos permanecen locales. Las descripciones Hito 1 siguientes son históricas donde contradigan esta ampliación. Ver [HITO_2_1.md](HITO_2_1.md).
+
 ## Personalidad
 Plataforma académica y comunitaria; orden editorial de biblioteca digital, no dashboard administrativo.
 Tonos: verde bosque #174B38, verde medio #348568, marfil #F5F5EE y texto #182521. Crear tokens light/dark; revisar contraste WCAG AA.

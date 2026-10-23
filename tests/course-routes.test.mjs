@@ -5,7 +5,7 @@ import test from "node:test";
 // Read-only requests to the coordinator's server; no server/build lifecycle.
 const base = process.env.WIKI_TEST_BASE_URL;
 const privateMarkers = ["MARCADOR_PRIVADO", "demo-pending-calculo", "demo-rejected-calculo", "privado-pendiente.pdf", "privado-rechazado.pdf", "originalFilename", "submittedAt"];
-const newRoutes = ["/gestion/asignaturas", "/electivos", "/favoritos", "/semestres/5", "/moderacion"];
+const newRoutes = ["/gestion/asignaturas", "/electivos", "/favoritos", "/semestres/5"];
 
 async function request(path, options = {}) {
   assert.ok(["127.0.0.1", "localhost", "[::1]"].includes(new URL(base).hostname), "Only an existing loopback fixture server is allowed");

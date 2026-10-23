@@ -158,8 +158,11 @@ export async function createBrowser({ base, artifacts, report }) {
     }
     const viewport = (width) => call("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false });
     async function theme(dark) {
+      // SSR buttons start with the server snapshot; wait for the visible control to hydrate before clicking.
+      const visibleToggle = `[...document.querySelectorAll('button[aria-label="Tema oscuro"]')].find(e=>e.getClientRects().length)`;
+      await wait(`(${visibleToggle})?.getAttribute('aria-pressed')===String(document.documentElement.classList.contains('dark'))`, "theme control hydrated before click");
       if (await evaluate("document.documentElement.classList.contains('dark')") !== dark) await click('button[aria-label="Tema oscuro"]');
-      await wait(`document.documentElement.classList.contains('dark')===${dark} && document.querySelector('button[aria-label="Tema oscuro"]')?.getAttribute('aria-pressed')===${text(String(dark))}`, "theme hydrated");
+      await wait(`document.documentElement.classList.contains('dark')===${dark} && (${visibleToggle})?.getAttribute('aria-pressed')===${text(String(dark))}`, "theme hydrated");
     }
     async function snapshot(name) {
       await evaluate("window.scrollTo(0,0)"); await sleep(80);

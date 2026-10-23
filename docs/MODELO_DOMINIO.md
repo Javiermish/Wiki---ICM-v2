@@ -1,4 +1,6 @@
-# Modelo de dominio propuesto (Hito 1: diseño, no migración SQL)
+# Modelo de dominio — catálogo propuesto y cuentas Hito 2.1
+
+> **Hito 2.1:** únicamente cuentas tienen migración SQL implementada. `profiles(id, display_name, created_at, updated_at)` referencia `auth.users`; `user_roles(user_id, role)` separa permisos de campos editables; `role_change_events` registra cambios administrativos. Registro siempre student; confirmación obligatoria; roles consultados en DB, no metadata. Ver `supabase/migrations` y [AUTH_SQL.md](AUTH_SQL.md). El modelo académico siguiente sigue siendo propuesta/fixtures, no DB implementada. Archivos futuros en Cloudflare R2, no Supabase Storage.
 
 > Las secciones 1.4.1 conservan decisiones históricas. Hito 1.5 autoriza moderación/reportes DEMO y favoritos persistidos localmente; su ampliación al final y `HITO_1_5.md` prevalecen sobre las antiguas notas de no autorización. No hay backend conectado.
 

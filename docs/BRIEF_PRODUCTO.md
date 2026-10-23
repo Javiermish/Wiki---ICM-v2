@@ -35,3 +35,7 @@ Reclasificar conserva ID/slug, documentos y periodos académicos; archivar no de
 
 ## Restricciones
 No afirmar que los ramos de ejemplo conforman la malla oficial. No almacenar ni publicar documentos de terceros sin permiso. Moderación y políticas de acceso deben estar del lado del servidor en versión funcional.
+
+## Ampliación autorizada Hito 2.1
+
+Auth Supabase real con correo confirmado, perfiles propios y roles student/moderator/admin, administración de moderadores e historial. `/moderacion` requiere ahora moderador/admin verificado en servidor, pero conserva sus operaciones sintéticas: ninguna aprobación publica contenido. Catálogo público, gestión académica y aportes permanecen demo. Favoritos siguen locales, sin sincronización con cuentas. La arquitectura definitiva reserva Supabase para Auth/PostgreSQL, Cloudflare R2 para futuros archivos y Vercel Hobby para alojamiento futuro; no Supabase Storage para documentos. Sin despliegue ni Hito 2.2. Configuración, pruebas y límites: [HITO_2_1.md](HITO_2_1.md).

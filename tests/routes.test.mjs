@@ -46,7 +46,7 @@ test("rutas y HTML del prototipo", { skip: !base }, async (t) => {
     }
   });
   await t.test("favoritos locales y semestre curricular vacío son públicos", async () => {
-    for (const path of ["/moderacion", "/favoritos", "/semestres/5"]) {
+    for (const path of ["/favoritos", "/semestres/5"]) {
       const response = await fetch(new URL(path, base));
       assert.equal(response.status, 200, path);
       const html = await response.text();
