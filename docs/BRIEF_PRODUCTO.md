@@ -1,5 +1,7 @@
 # Wiki ICM — Brief de producto
 
+> **Hito 2.2 completado y aprobado para V1 (23-10-2026):** catálogo académico, administración y solicitudes en PostgreSQL con RLS. Archivos/reportes siguen DEMO y favoritos locales. Pruebas adicionales de RLS remoto con cuentas temporales diferidas por decisión expresa, con limitación aceptada y procedimientos conservados. Seguridad intacta; última verificación local y evidencia previa: [QA_HITO_2_2.md](QA_HITO_2_2.md). Hito 2.3 no autorizado. Las notas inferiores son históricas donde contradigan este estado.
+
 ## Propósito
 Biblioteca colaborativa de Ingeniería Civil Matemática (UdeC) para encontrar, consultar, descargar y aportar material académico confiable.
 

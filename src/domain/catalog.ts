@@ -11,6 +11,7 @@ export interface ElectiveArea {
 }
 
 interface CourseBase {
+  readonly version?: number;
   readonly id: string;
   readonly code: string | null;
   readonly slug: string;

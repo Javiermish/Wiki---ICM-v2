@@ -28,21 +28,20 @@ async function page(path, status = 200) {
   return html;
 }
 
-test("catálogo editable y favoritos: contratos HTTP de la demostración pública", { skip: !base }, async (t) => {
-  await t.test("gestión pública no finge autenticación, autorización ni guardado real", async () => {
-    const html = await page("/gestion/asignaturas");
-    assert.match(html, /Gestión de asignaturas/);
-    assert.match(html, /no segura|no es una administración real/i);
-    assert.match(html, /memoria/);
-    assert.match(html, /recargar/);
-    assert.match(html, /sin login|No requiere iniciar sesión/);
-    assert.ok(!/<input\b[^>]*type="(?:email|password)"/i.test(html));
-    assert.ok(!/<input\b[^>]*(?:name|id)="(?:role|uploadedBy|status|userId)"/i.test(html));
-    assert.ok(!/<form\b[^>]*(?:action="https?:|method="post")/i.test(html));
-    for (const field of ["name", "code", "kind", "curricularSemester", "description"]) assert.ok(html.includes(`id="course-${field}"`), field);
-    assert.match(html, /<fieldset\b[^>]*\bdisabled/);
-    assert.match(html, /<noscript\b[^>]*>[\s\S]*?JavaScript[\s\S]*?<\/noscript>/);
-    for (const id of ["demo-calculo-i", "demo-geometria"]) assert.ok(html.includes(id));
+test("catálogo persistente y favoritos: HTTP con seed inicial aplicado", { skip: !base }, async (t) => {
+  await t.test("gestión y solicitudes requieren sesión; no entregan formularios privados al visitante", async () => {
+    for (const path of ["/admin/ramos", "/gestion/asignaturas"]) {
+      const response = await request(path);
+      const html = await response.text();
+      assert.ok([200, 303, 307, 308].includes(response.status));
+      const destination = response.headers.get("location") ?? html.match(/http-equiv="refresh"[^>]*content="\d+;url=([^"]+)"/i)?.[1];
+      assert.ok(destination, "Debe haber una redirección ejecutable a login");
+      const target = new URL(destination.replaceAll("&amp;", "&"), base);
+      assert.equal(target.pathname, "/login");
+      assert.equal(target.searchParams.get("next"), path);
+      for (const field of ["course-name", "request-name", "request-justification"]) assert.ok(!html.includes(`id="${field}"`));
+      noPrivateData(html, path);
+    }
   });
 
   await t.test("electivos por área existen incluso sin documentos ni semestre curricular", async () => {
@@ -65,17 +64,19 @@ test("catálogo editable y favoritos: contratos HTTP de la demostración públic
     assert.ok(!elective.includes("semestres/null"));
   });
 
-  await t.test("semestres canónicos 1–12 abiertos y slugs locales tienen shell explicativo", async () => {
+  await t.test("semestres canónicos 1–12 abiertos y slugs desconocidos ya no tienen excepción local", async () => {
     for (const semester of [5, 12]) {
       const html = await page(`/semestres/${semester}`);
       assert.ok(html.includes(`Semestre curricular ${semester}`));
       assert.match(html, /Aún no hay ramos de ejemplo/);
     }
-    const local = await page("/ramos/local-qa-course-unavailable");
-    assert.match(local, /Ramo local no disponible/);
-    assert.match(local, /recargar/);
-    assert.ok(local.includes('href="/gestion/asignaturas"'));
-    for (const path of ["/semestres/0", "/semestres/13", "/semestres/01", "/semestres/1.0", "/ramos/no-existe", "/ramos/local-", "/materiales/no-existe", "/materiales/demo-pending-calculo", "/materiales/demo-rejected-calculo"]) await page(path, 404);
+    for (const path of ["/ramos/no-existe", "/ramos/local-", "/ramos/local-qa-course-unavailable"]) {
+      const response = await request(path);
+      const html = await response.text();
+      assert.ok([200, 404].includes(response.status), "Next puede emitir notFound después de comenzar streaming");
+      assert.ok(html.includes("No encontramos esta página"));
+    }
+    for (const path of ["/semestres/0", "/semestres/13", "/semestres/01", "/semestres/1.0", "/materiales/no-existe", "/materiales/demo-pending-calculo", "/materiales/demo-rejected-calculo"]) await page(path, 404);
   });
 
   await t.test("favoritos comienza vacío, es local y no solicita credenciales", async () => {

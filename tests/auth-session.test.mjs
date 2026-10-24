@@ -61,6 +61,43 @@ test('proxy renueva con getClaims y conserva cookies y cabeceras no-cache (SDK d
   assert.equal(response.headers.get('pragma'),'no-cache');
 });
 
+test('proxy resuelve rutas académicas antes del streaming sin ocultar fallas de DB (SDK doble)', async () => {
+  const state = { data: null, error: null, configured: true };
+  const filters = [];
+  const query = {
+    select: () => query,
+    eq: (key, value) => { filters.push([key, value]); return query; },
+    maybeSingle: async () => ({ data: state.data, error: state.error }),
+  };
+  const { proxy } = await load('../src/proxy.ts', [/import[\s\S]*?from "@supabase\/ssr";/, /import[\s\S]*?from "next\/server";/, /import[\s\S]*?from "\.\/lib\/supabase\/config";/], {
+    NextResponse,
+    getSupabaseConfig: () => state.configured ? { url: 'https://example.supabase.co', key: 'public-test' } : null,
+    createServerClient: (_url, _key, options) => ({
+      auth: { getClaims: async () => options.cookies.setAll([{ name: 'sb-test-auth-token', value: 'renewed', options: { path: '/' } }], { Pragma: 'no-cache' }) },
+      from: table => { assert.equal(table, 'courses'); return query; },
+    }),
+  });
+  for (const path of ['/semestres/0', '/semestres/13', '/semestres/01', '/semestres/1x', '/ramos/no-existe', '/ramos/local-no-existe', '/ramos/%FF']) {
+    const response = await proxy(new NextRequest(`https://wiki.example${path}?q=qa`));
+    assert.equal(response.status, 404, path);
+    assert.equal(new URL(response.headers.get('x-middleware-rewrite')).pathname, '/404');
+    assert.equal(response.headers.get('x-middleware-next'), null);
+    assert.match(response.headers.get('cache-control'), /private.*no-store/);
+    assert.equal(response.cookies.get('sb-test-auth-token').value, 'renewed');
+  }
+  assert.ok(filters.some(([key, value]) => key === 'status' && value === 'active'));
+  assert.ok(filters.some(([key, value]) => key === 'slug' && value === 'local-no-existe'));
+  state.data = { id: 'persistent-new-course' };
+  for (const path of ['/semestres/1', '/semestres/12', '/ramos/new-db-slug', '/ramos/local-persistent', '/login']) {
+    assert.equal((await proxy(new NextRequest(`https://wiki.example${path}`))).status, 200, path);
+  }
+  state.data = null; state.error = { code: '42P01' };
+  assert.equal((await proxy(new NextRequest('https://wiki.example/ramos/calculo-i'))).status, 200, 'DB errors must reach the explicit catalog error UI');
+  state.configured = false;
+  assert.equal((await proxy(new NextRequest('https://wiki.example/semestres/01'))).status, 404);
+  assert.equal((await proxy(new NextRequest('https://wiki.example/ramos/calculo-i'))).status, 200);
+});
+
 test('matriz de rutas protegidas: visitante, estudiante, moderador y administrador (SDK doble)', async (t) => {
   const state = { role: null };
   const client = {

@@ -6,8 +6,9 @@ const privateMarkers = ["MARCADOR_PRIVADO", "demo-pending-calculo", "demo-reject
 
 async function page(path, status = 200) {
   const response = await fetch(new URL(path, base));
-  assert.equal(response.status, status, path);
+  assert.ok(response.status === status || (status === 404 && path.startsWith("/ramos/") && response.status === 200), path);
   const html = await response.text();
+  if (status === 404 && path.startsWith("/ramos/")) assert.ok(html.includes("No encontramos esta página"), "404 semántico incluso tras streaming");
   // Next puede reflejar el segmento solicitado en el estado del router de un 404.
   // Eso no es información obtenida del catálogo: no confundirlo con una fuga.
   for (const marker of privateMarkers.filter((marker) => !path.includes(marker))) {

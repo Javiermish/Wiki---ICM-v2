@@ -50,7 +50,7 @@ function QueueSection<T extends { readonly id: string; readonly status: string }
   </section>;
 }
 
-export function ModerationWorkspace() {
+export function ModerationWorkspace({ showCourseRequests = true }: { showCourseRequests?: boolean }) {
   const { catalog } = useCourseCatalog();
   const { snapshot, service } = useModeration();
   const [notice, setNotice] = useState("");
@@ -69,7 +69,7 @@ export function ModerationWorkspace() {
   const outstanding = { materials: snapshot.materials.filter((item) => item.status === "pending").length, requests: snapshot.requests.filter((item) => item.status === "pending").length, reports: snapshot.reports.filter((item) => item.status === "open").length };
 
   return <div className="space-y-8">
-    <nav aria-label="Apartados de moderación" className="flex flex-wrap gap-3"><a className="text-link inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4" href="#materiales-revision">Materiales · {outstanding.materials} pendientes</a><a className="text-link inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4" href="#solicitudes">Solicitudes · {outstanding.requests} pendientes</a><a className="text-link inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4" href="#reportes">Reportes · {outstanding.reports} abiertos</a></nav>
+    <nav aria-label="Apartados de moderación DEMO" className="flex flex-wrap gap-3"><a className="text-link inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4" href="#materiales-revision">Materiales DEMO · {outstanding.materials} pendientes</a>{showCourseRequests ? <a className="text-link inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4" href="#solicitudes">Solicitudes DEMO · {outstanding.requests} pendientes</a> : null}<a className="text-link inline-flex min-h-11 items-center rounded-lg border border-border bg-card px-4" href="#reportes">Reportes DEMO · {outstanding.reports} abiertos</a></nav>
     <div ref={feedback} tabIndex={-1} role="status" className={notice ? "rounded-xl border border-primary bg-secondary p-5 text-sm text-secondary-foreground" : "sr-only"}>{notice}</div>
     <noscript><p className="rounded-xl border border-border bg-muted p-5">Activa JavaScript para practicar decisiones locales. Sin JavaScript los controles están deshabilitados; no hay envíos ni cambios.</p></noscript>
     <fieldset disabled={!interactive} className="min-w-0 space-y-12"><legend className="sr-only">Colas públicas de demostración, sin permisos efectivos</legend>
@@ -87,7 +87,7 @@ export function ModerationWorkspace() {
           </article>;
         }} />
 
-      <QueueSection id="solicitudes" title="Solicitudes de ramos" description="Propuestas regulares o electivas. Se comparan con el catálogo dinámico y con otras solicitudes reservadas. Aprobar NO crea un ramo en esta demo." items={snapshot.requests} initialStatus="pending" extra={<Link href="/gestion/asignaturas#course-form" className="text-link mt-3 inline-flex min-h-11 items-center">Preparar una solicitud DEMO en Gestión</Link>} searchText={(request) => `${request.id} ${request.proposedCourse.name} ${request.proposedCourse.code ?? ""} ${request.proposedCourse.kind} ${catalog.electiveAreas.find((area) => area.id === request.proposedCourse.electiveAreaId)?.name ?? ""}`}
+      {showCourseRequests ? <QueueSection id="solicitudes" title="Solicitudes de ramos" description="Propuestas regulares o electivas. Se comparan con el catálogo dinámico y con otras solicitudes reservadas. Aprobar NO crea un ramo en esta demo." items={snapshot.requests} initialStatus="pending" extra={<Link href="/gestion/asignaturas#course-form" className="text-link mt-3 inline-flex min-h-11 items-center">Preparar una solicitud DEMO en Gestión</Link>} searchText={(request) => `${request.id} ${request.proposedCourse.name} ${request.proposedCourse.code ?? ""} ${request.proposedCourse.kind} ${catalog.electiveAreas.find((area) => area.id === request.proposedCourse.electiveAreaId)?.name ?? ""}`}
         render={(request) => {
           const proposal = request.proposedCourse;
           const validation = validateCourseInput(proposalInput(proposal), catalog);
@@ -98,7 +98,7 @@ export function ModerationWorkspace() {
             {request.status === "pending" ? <><RequestMetadataEditor request={request} onDone={done} /><ReviewActions resourceName={proposal.name} onReview={(decision) => service.reviewCourseRequest(request.id, decision)} onDone={done} /></> : null}
             <History events={history("course-request", request.id)} />
           </article>;
-        }} />
+        }} /> : null}
 
       <QueueSection id="reportes" title="Reportes" description="El mismo formulario de reporte de las fichas alimenta esta cola en memoria. Resolver requiere una explicación y nunca retira ni modifica el material público." items={snapshot.reports} initialStatus="open" searchText={(report) => { const material = publicMaterialById(catalog, report.materialId); return `${report.id} ${report.materialId} ${report.reason} ${report.description} ${material?.displayName ?? ""} ${material?.course.name ?? ""}`; }}
         render={(report) => {

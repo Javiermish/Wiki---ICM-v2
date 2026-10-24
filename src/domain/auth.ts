@@ -9,7 +9,7 @@ export function isRole(value: unknown): value is Role {
 
 // An allowlist avoids URL-parser disagreements, encoded separators and auth loops.
 export function safeNext(value: unknown): string {
-  return typeof value === "string" && ["/mi-cuenta", "/mis-aportes", "/moderacion", "/admin/usuarios", "/favoritos", "/restablecer-contrasena"].includes(value) ? value : "/mi-cuenta";
+  return typeof value === "string" && ["/mi-cuenta", "/mis-aportes", "/moderacion", "/admin/usuarios", "/admin/ramos", "/gestion/asignaturas", "/favoritos", "/restablecer-contrasena"].includes(value) ? value : "/mi-cuenta";
 }
 
 export function validateAuthForm(kind: AuthFormKind, values: Record<string, string>): Record<string, string> {

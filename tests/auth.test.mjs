@@ -4,7 +4,7 @@ import { safeNext, validateAuthForm, isRole } from '../src/domain/auth.ts';
 
 test('destinos de autenticación solo aceptan rutas internas conocidas', () => {
   for (const value of ['https://evil.test','//evil.test','/\\evil.test','/%2f%2fevil.test','/login','/auth/confirm','/mi-cuenta\r\nLocation:x', '/mi-cuenta?next=https://evil.test']) assert.equal(safeNext(value), '/mi-cuenta');
-  for (const value of ['/mi-cuenta','/moderacion','/admin/usuarios','/mis-aportes','/favoritos']) assert.equal(safeNext(value), value);
+  for (const value of ['/mi-cuenta','/moderacion','/admin/usuarios','/admin/ramos','/gestion/asignaturas','/mis-aportes','/favoritos']) assert.equal(safeNext(value), value);
 });
 
 test('registro valida correo, contraseña confirmada y descarta roles suministrados', () => {

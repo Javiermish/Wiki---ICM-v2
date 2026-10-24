@@ -363,10 +363,16 @@ try {
     await snapshot('course-no-results');
     await button('Limpiar búsqueda');
     await wait(`document.querySelectorAll('input[name="courseId"]').length===${initialCourseCount}`);
+    const nextCourseId = await evaluate(`(() => {
+      const radios = [...document.querySelectorAll('input[name="courseId"]:not(:disabled)')];
+      const current = radios.indexOf(document.querySelector(${text(courseRadio)}));
+      return radios[(current + 1) % radios.length]?.value;
+    })()`);
+    assert.ok(nextCourseId && nextCourseId !== 'demo-calculo-i', 'Radio group has another enabled course');
     await focus(courseRadio); await press('ArrowRight');
-    await wait(`document.querySelector('input[name="courseId"]:checked')?.value==='demo-algebra-i'`,'native radio arrow selection');
+    await wait(`document.querySelector('input[name="courseId"]:checked')?.value===${text(nextCourseId)} && document.activeElement?.value===${text(nextCourseId)}`,'native radio arrow selects and focuses next DOM option');
     await press('ArrowLeft');
-    await wait(`document.querySelector(${text(courseRadio)})?.checked`);
+    await wait(`document.querySelector(${text(courseRadio)})?.checked && document.activeElement===document.querySelector(${text(courseRadio)})`);
     assert.match(await evaluate(`document.querySelector('main').innerText`),/Semestre curricular 1/);
   });
 

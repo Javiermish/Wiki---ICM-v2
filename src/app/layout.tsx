@@ -3,10 +3,9 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { PrototypeNotice } from "@/components/layout/prototype-notice";
 import { themeInitializationScript } from "@/lib/theme";
-import { CourseCatalogProvider } from "@/components/catalog/course-catalog-provider";
-import { FavoritesFeedback, FavoritesProvider } from "@/components/catalog/favorites-provider";
-import { ModerationProvider } from "@/components/moderation/moderation-provider";
-import { getPublicDemoCatalog } from "@/lib/catalog/data";
+import { Suspense } from "react";
+import { PersistentCatalogShell } from "@/components/catalog/persistent-catalog-shell";
+import { CatalogLoading } from "@/components/catalog/catalog-loading";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,17 +26,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col">
         <a href="#contenido" className="fixed top-3 left-4 z-50 -translate-y-24 rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground focus:translate-y-0">Saltar al contenido</a>
-        <CourseCatalogProvider initialCatalog={getPublicDemoCatalog()}>
-          <FavoritesProvider>
-          <ModerationProvider>
-          <SiteHeader />
-           <PrototypeNotice />
-           <FavoritesFeedback />
-          {children}
+        <SiteHeader />
+        <PrototypeNotice />
+        <Suspense fallback={<CatalogLoading />}>
+          <PersistentCatalogShell>{children}</PersistentCatalogShell>
+        </Suspense>
           <SiteFooter />
-          </ModerationProvider>
-          </FavoritesProvider>
-        </CourseCatalogProvider>
       </body>
     </html>
   );

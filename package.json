@@ -12,7 +12,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser-auth.mjs && node tests/browser-materials.mjs && node tests/browser-catalog.mjs && node tests/browser-favorites.mjs && node tests/browser-contributions.mjs && WIKI_CATALOG_QA_MODE=public node tests/browser-persistent-catalog.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -36,6 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
+    "supabase": "^2.121.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

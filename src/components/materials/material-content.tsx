@@ -15,9 +15,17 @@ import type { PublicMaterialFile } from "@/domain/material-file";
 import { categoryLabels, courseClassification, courseParentBreadcrumb, publicMaterialById } from "@/lib/catalog/query";
 import { courseHref } from "@/lib/catalog/course-filters";
 
-export function MaterialContent({ id, file, filters, hasContext }: { id: string; file: PublicMaterialFile | null; filters: CatalogFilters; hasContext: boolean }) {
+export function MaterialContent({ id, file, filters, hasContext, sampleTitle }: { id: string; file: PublicMaterialFile | null; filters: CatalogFilters; hasContext: boolean; sampleTitle?: string }) {
   const { catalog } = useCourseCatalog();
   const material = publicMaterialById(catalog, id);
+  if (!material && sampleTitle) return <main id="contenido" tabIndex={-1} className="page-container min-w-0 flex-1 py-10">
+    <Badge>Muestra local independiente del catálogo</Badge>
+    <h1 className="mt-3 text-3xl font-semibold">{sampleTitle}</h1>
+    <p className="my-5 text-muted-foreground">Este archivo de demostración sigue disponible, pero su ramo no está en el catálogo activo o PostgreSQL no está disponible. No se reemplazan los datos académicos por fixtures.</p>
+    {file ? <a href={file.downloadUrl} download={file.downloadName} className={`${buttonVariants()} mb-5 min-h-11`}>Descargar {file.extension.toUpperCase()}</a> : <h2 className="my-5 text-xl font-semibold">Archivo no disponible</h2>}
+    {file ? <DocumentReader key={id} file={file} title={sampleTitle} /> : null}
+    <Link href="/" className="text-link mt-5 inline-flex min-h-11 items-center">Volver al catálogo</Link>
+  </main>;
   if (!material) return <main id="contenido" tabIndex={-1} className="page-container flex-1 pt-6 pb-12 sm:pt-8 sm:pb-16"><EmptyState title="Material no disponible"><p>Este material no está disponible en el catálogo público de demostración.</p><Link href="/" className="text-link mt-3 inline-flex min-h-11 items-center rounded font-semibold">Volver al catálogo</Link></EmptyState></main>;
   const backHref = courseHref(material.course.slug, hasContext ? { ...filters, category: material.category } : { category: material.category });
   const classification = courseClassification(material.course, catalog.electiveAreas);

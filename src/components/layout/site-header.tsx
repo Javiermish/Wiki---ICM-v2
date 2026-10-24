@@ -66,8 +66,9 @@ function AccountControls({ account }: { account: Account | null }) {
     ? [
       { href: "/mi-cuenta", label: "Mi cuenta" },
       { href: "/mis-aportes", label: "Mis aportes · próximamente" },
-      ...(account.role === "moderator" || account.role === "admin" ? [{ href: "/moderacion", label: "Moderación · demo" }] : []),
-      ...(account.role === "admin" ? [{ href: "/admin/usuarios", label: "Gestión de usuarios" }] : []),
+      { href: "/gestion/asignaturas", label: "Solicitar un ramo" },
+      ...(account.role === "moderator" || account.role === "admin" ? [{ href: "/moderacion", label: "Moderación" }] : []),
+      ...(account.role === "admin" ? [{ href: "/admin/ramos", label: "Gestión de ramos" }, { href: "/admin/usuarios", label: "Gestión de usuarios" }] : []),
     ]
     : [{ href: "/login", label: "Iniciar sesión" }, { href: "/registro", label: "Registrarse" }];
   return <>

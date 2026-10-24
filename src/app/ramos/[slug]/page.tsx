@@ -1,29 +1,27 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CourseContent } from "@/components/catalog/course-content";
-import { getDemoCatalog } from "@/lib/catalog/data";
+import { getPublicCatalog } from "@/lib/catalog/persistent";
 import { parseCourseFilters } from "@/lib/catalog/course-filters";
 import type { SearchParameters } from "@/lib/catalog/filters";
 import CourseLoading from "./loading";
 
 type CourseProps = { params: Promise<{ slug: string }>; searchParams: Promise<SearchParameters> };
 
-// Admite slugs locales; espera la validación antes de responder a rutas nuevas.
+// Espera la validación antes de responder a rutas nuevas persistentes.
 export const unstable_paramMatching = { slug: "blocking" } as const;
 
-export function generateStaticParams() {
-  return getDemoCatalog().courses.map((course) => ({ slug: course.slug }));
+export default function CoursePage(props: CourseProps) {
+  return <Suspense fallback={<CourseLoading />}><CourseQuery {...props} /></Suspense>;
 }
 
-export default async function CoursePage({ params, searchParams }: CourseProps) {
+async function CourseQuery({ params, searchParams }: CourseProps) {
   const { slug } = await params;
-  const exists = getDemoCatalog().courses.some((course) => course.slug === slug);
-  // Los slugs locales se resuelven contra el provider, no el catálogo del servidor.
-  if (!exists && !/^local-[a-zA-Z0-9-]+$/.test(slug)) notFound();
-  return <Suspense fallback={<CourseLoading />}><CourseQuery slug={slug} searchParams={searchParams} /></Suspense>;
-}
-
-async function CourseQuery({ slug, searchParams }: { slug: string; searchParams: Promise<SearchParameters> }) {
+  let catalog;
+  try { catalog = await getPublicCatalog(); } catch {
+    return <main id="contenido" tabIndex={-1} className="page-container flex-1 py-10"><h1 className="text-3xl font-semibold">No se pudo cargar el ramo</h1><p role="alert" className="mt-4">El catálogo no está disponible. Reintenta cuando se restablezca la conexión con PostgreSQL; no se mostrará un ramo de ejemplo como reemplazo.</p><a href="" className="text-link mt-3 inline-flex min-h-11 items-center">Reintentar</a></main>;
+  }
+  if (!catalog.courses.some((course) => course.slug === slug)) notFound();
   const { filters, errors } = parseCourseFilters(await searchParams);
   return <CourseContent slug={slug} filters={filters} errors={errors} />;
 }

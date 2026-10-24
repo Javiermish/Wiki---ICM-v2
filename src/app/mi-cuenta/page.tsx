@@ -15,7 +15,7 @@ export default function AccountPage(props: { searchParams: Promise<{ error?: str
 async function AccountContent({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const account = await requireAccount("/mi-cuenta");
   const params = await searchParams;
-  return <AuthShell title="Mi cuenta" description="Esta es tu cuenta real. El catálogo, los aportes y los favoritos conservan su alcance de demostración.">
+  return <AuthShell title="Mi cuenta" description="Esta es tu cuenta real. El catálogo y las solicitudes son persistentes; los archivos siguen siendo muestras y los favoritos son locales.">
     {params.error === "forbidden" && <p role="alert" className="text-sm text-destructive">Tu cuenta no tiene permisos para acceder a esa sección.</p>}
     {params.error === "logout" && <p role="alert" className="text-sm text-destructive">No pudimos cerrar la sesión. Comprueba tu conexión e inténtalo de nuevo.</p>}
     <dl className="space-y-2 text-sm"><div><dt className="font-medium">Correo verificado</dt><dd className="break-all">{account.email}</dd></div><div><dt className="font-medium">Rol</dt><dd>{account.role === "admin" ? "Administrador" : account.role === "moderator" ? "Moderador" : "Estudiante"}</dd></div></dl>

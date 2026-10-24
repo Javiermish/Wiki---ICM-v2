@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 const base = process.env.WIKI_TEST_BASE_URL;
-const privateRoutes = ["/restablecer-contrasena", "/mi-cuenta", "/mis-aportes", "/moderacion", "/admin/usuarios"];
+const privateRoutes = ["/restablecer-contrasena", "/mi-cuenta", "/mis-aportes", "/moderacion", "/admin/usuarios", "/admin/ramos", "/gestion/asignaturas"];
 const privateMarkers = ['name="displayName"', 'name="targetUserId"', 'name="passwordConfirm"', 'id="materiales-revision"', 'id="solicitudes"', 'id="reportes"', "Historial real de cambios de rol", "Esta es tu cuenta real.", "Todavía no hay envío, almacenamiento ni revisión real de archivos."];
 const get = (path) => fetch(new URL(path, base), { redirect: "manual", signal: AbortSignal.timeout(15000) });
 

@@ -16,11 +16,11 @@ interface FavoritesContextValue {
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 /** Referencias locales, sin cuenta; siempre se resuelven contra el catálogo público. */
-export function FavoritesProvider({ children }: { children: ReactNode }) {
+export function FavoritesProvider({ children, catalogAvailable = true }: { children: ReactNode; catalogAvailable?: boolean }) {
   const { catalog } = useCourseCatalog();
   const [store] = useState(() => createLocalFavoritesStore(() => window.localStorage));
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
-  useEffect(() => { store.hydrate(catalog); }, [store, catalog]);
+  useEffect(() => { if (catalogAvailable) store.hydrate(catalog); }, [store, catalog, catalogAvailable]);
   const toggle = useCallback((reference: FavoriteReference) => {
     const saved = store.getSnapshot().references.some(item => sameFavorite(item, reference));
     store.setSaved(reference, !saved, catalog);

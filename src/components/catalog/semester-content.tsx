@@ -17,7 +17,7 @@ export function SemesterContent({ semester, filters, errors }: { semester: numbe
   return (
     <main id="contenido" tabIndex={-1} className="page-container flex-1 pt-6 pb-12 sm:pt-8 sm:pb-16">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: `Semestre curricular ${semester}` }]} />
-      <Badge>Catálogo de demostración</Badge>
+      <Badge>Catálogo académico</Badge>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Semestre curricular {semester}</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">Ramos y códigos ficticios para explorar el prototipo. Esta selección no representa ni valida la malla oficial de la UdeC.</p>
       <SemesterNavigation semesters={catalogSemesters(catalog)} current={semester} />

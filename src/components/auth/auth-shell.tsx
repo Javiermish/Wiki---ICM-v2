@@ -15,7 +15,7 @@ export function AuthShell({ title, description, children }: { title: string; des
         <legend className="sr-only">{title}</legend>
         {children}
       </fieldset>
-      <p className="mt-5 text-sm text-muted-foreground"><Link href="/" className="underline underline-offset-4">Explorar sin iniciar sesión</Link>. El catálogo y los favoritos siguen siendo de demostración.</p>
+      <p className="mt-5 text-sm text-muted-foreground"><Link href="/" className="underline underline-offset-4">Explorar sin iniciar sesión</Link>. Los archivos son muestras de demostración y los favoritos siguen siendo locales.</p>
     </div>
   </main>;
 }

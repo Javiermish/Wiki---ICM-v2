@@ -36,9 +36,9 @@ export const courseInputLimits = Object.freeze({ name: 160, code: 40, descriptio
 
 const text = (value: unknown): string => typeof value === "string" ? value.normalize("NFC").trim() : "";
 const singleLine = (value: unknown): string => text(value).replace(/\s+/g, " ");
-/** Clave de comparación y búsqueda, sin acentos, puntuación ni diferencias de caja. */
+/** V1: identidad latina ASCII tras NFD; misma clasificación explícita que PostgreSQL. */
 export const normalizeCourseText = (value: string): string => value.normalize("NFD")
-  .replace(/\p{M}/gu, "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  .replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 const hasControlCharacters = (value: string, multiline = false): boolean => [...value].some((character) => {
   const code = character.charCodeAt(0);
@@ -89,6 +89,9 @@ export function validateCourseInput(input: CourseInput, catalog: Catalog, exclud
     if (typeof raw[field] !== "string") errors[field] = "Introduce un texto válido.";
   }
   if (name.length < 2 || name.length > courseInputLimits.name) errors.name = `Usa entre 2 y ${courseInputLimits.name} caracteres para el nombre.`;
+  if (!/^[\x20-\x7e–—‘’“”¿¡·]+$/u.test(name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")) || !normalizeCourseText(name)) {
+    errors.name = "Usa letras latinas (pueden llevar acentos), números del 0 al 9 y puntuación habitual para el nombre.";
+  }
   if (hasControlCharacters(text(raw.name))) errors.name = "El nombre no admite caracteres de control.";
   if (code.length > courseInputLimits.code || (code !== "" && !/^[A-Z0-9][A-Z0-9 ._/-]*$/.test(code))) {
     errors.code = `Usa hasta ${courseInputLimits.code} letras, números, espacios o . _ / - para el código.`;

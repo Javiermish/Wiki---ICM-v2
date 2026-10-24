@@ -8,9 +8,12 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createBrowser, text } from "./browser-driver.mjs";
+import { createBrowser, text } from "../browser-driver.mjs";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+console.log("RETIRADO: runner de gestión DEMO pública. No ejecutar contra Hito 2.2. Ver docs/QA_RUNNERS_HISTORICOS.md.");
+process.exit(0);
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const artifacts = resolve(root, ".next/qa-courses-evidence");
 const report = { started: new Date().toISOString(), checks: [], screenshots: [] };
 const management = "/gestion/asignaturas";

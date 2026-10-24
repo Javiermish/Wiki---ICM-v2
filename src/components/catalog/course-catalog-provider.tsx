@@ -1,36 +1,44 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import type { PublicCatalog } from "@/domain/catalog";
 import type { CourseInput } from "@/domain/course-management";
-import { createDemoCourseRepository } from "@/lib/catalog/repository";
+import { createCourseAction, updateCourseAction, setCourseArchivedAction } from "@/lib/catalog/actions";
 
-function useDemoCatalog(initialCatalog: PublicCatalog) {
-  // Una instancia por árbol/pestaña; nunca un singleton mutable en SSR.
-  const [repository] = useState(() => createDemoCourseRepository(initialCatalog));
-  const [catalog, setCatalog] = useState(() => repository.getCatalog());
+function usePersistentCatalog(initialCatalog: PublicCatalog) {
+  const router = useRouter();
+  const [snapshot, setSnapshot] = useState(initialCatalog);
+  const [catalog, setCatalog] = useState(initialCatalog);
+  if (snapshot !== initialCatalog) {
+    setSnapshot(initialCatalog);
+    setCatalog(initialCatalog);
+  }
   const createCourse = useCallback(async (input: CourseInput) => {
-    const course = repository.createCourse(input);
-    setCatalog(repository.getCatalog());
+    const course = await createCourseAction(input);
+    setCatalog((current) => ({ ...current, courses: [...current.courses, course] }));
+    router.refresh();
     return course;
-  }, [repository]);
-  const updateCourse = useCallback(async (id: string, input: CourseInput) => {
-    const course = repository.updateCourse(id, input);
-    setCatalog(repository.getCatalog());
+  }, [router]);
+  const updateCourse = useCallback(async (id: string, input: CourseInput, expectedVersion?: number) => {
+    const course = await updateCourseAction(id, input, expectedVersion);
+    setCatalog((current) => ({ ...current, courses: current.courses.map((item) => item.id === id ? course : item) }));
+    router.refresh();
     return course;
-  }, [repository]);
+  }, [router]);
   const setCourseArchived = useCallback(async (id: string, archived: boolean) => {
-    const course = repository.setCourseArchived(id, archived);
-    setCatalog(repository.getCatalog());
+    const course = await setCourseArchivedAction(id, archived, catalog.courses.find((item) => item.id === id)?.version);
+    setCatalog((current) => ({ ...current, courses: current.courses.map((item) => item.id === id ? course : item) }));
+    router.refresh();
     return course;
-  }, [repository]);
+  }, [catalog.courses, router]);
   return useMemo(() => ({ catalog, createCourse, updateCourse, setCourseArchived }), [catalog, createCourse, updateCourse, setCourseArchived]);
 }
 
-const CourseCatalogContext = createContext<ReturnType<typeof useDemoCatalog> | null>(null);
+const CourseCatalogContext = createContext<ReturnType<typeof usePersistentCatalog> | null>(null);
 
 export function CourseCatalogProvider({ initialCatalog, children }: { initialCatalog: PublicCatalog; children: ReactNode }) {
-  const value = useDemoCatalog(initialCatalog);
+  const value = usePersistentCatalog(initialCatalog);
   return <CourseCatalogContext.Provider value={value}>{children}</CourseCatalogContext.Provider>;
 }
 

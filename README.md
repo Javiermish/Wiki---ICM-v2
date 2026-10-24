@@ -211,11 +211,17 @@ El kit original y su mockup estático se conservan en `README_HITO1.md` y
 [`docs/HITO_1_4.md`](docs/HITO_1_4.md) (aportes locales y contratos futuros, histórico) y
 [`docs/HITO_1_4_1.md`](docs/HITO_1_4_1.md) (histórico: electivos y gestión) y
 [`docs/HITO_1_5.md`](docs/HITO_1_5.md) (histórico) y
-[`docs/HITO_2_1.md`](docs/HITO_2_1.md) (alcance vigente, configuración y límites).
+[`docs/HITO_2_1.md`](docs/HITO_2_1.md) (cuentas, configuración y límites) y
+[`docs/HITO_2_2.md`](docs/HITO_2_2.md) (**completado y aprobado para V1 el 23-10-2026**).
 Restricciones/consultas DB recomendadas y revisión transaccional futura en
 [`docs/MODELO_DOMINIO.md`](docs/MODELO_DOMINIO.md); son diseño, no migraciones aplicadas.
-Solo cuentas tienen migración implementada; no se han aplicado migraciones remotas.
-No se inicia Hito 2.2. Los archivos futuros usarán Cloudflare R2, no Supabase Storage.
+El Hito 2.2 incorpora catálogo, administración y solicitudes persistentes con RLS;
+las descripciones DEMO anteriores de gestión/solicitudes son históricas. El operador
+informa las cuatro migraciones aplicadas. Se acepta diferir QA adicional de RLS
+remoto con cuentas temporales; políticas y procedimientos quedan intactos.
+Última verificación local, evidencia previa y límites en
+[`docs/QA_HITO_2_2.md`](docs/QA_HITO_2_2.md). No se inicia Hito 2.3.
+Los archivos futuros usarán Cloudflare R2, no Supabase Storage.
 
 ## Dependencias del lector
 

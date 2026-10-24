@@ -2,7 +2,10 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createBrowser, text } from "./browser-driver.mjs";
+import { createBrowser, text } from "../browser-driver.mjs";
+
+console.log("RETIRADO: runner de moderación DEMO pública. No ejecutar contra Hito 2.2. Ver docs/QA_RUNNERS_HISTORICOS.md.");
+process.exit(0);
 
 const artifacts = resolve(".next/qa-moderation-evidence");
 const report = { started: new Date().toISOString() };

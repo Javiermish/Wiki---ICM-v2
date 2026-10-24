@@ -285,6 +285,18 @@ try {
     assert.equal(await evaluate(`${visibleCards}.length`), 0);
   });
 
+  await check('Elective area Todas preserves the current search query', async () => {
+    await navigate('/electivos?area=numerico&q=simulacion');
+    const allSelector = 'nav[aria-label="Áreas de electivos"] a:first-child';
+    await wait(`!!document.querySelector(${text(allSelector)})?.getClientRects().length`);
+    const href = await evaluate(`document.querySelector(${text(allSelector)}).getAttribute('href')`);
+    const destination = new URL(href, base);
+    assert.equal(destination.searchParams.get('q'), 'simulacion');
+    assert.equal(destination.searchParams.get('area'), null);
+    await click(allSelector);
+    await wait(`location.pathname==='/electivos' && new URL(location.href).searchParams.get('q')==='simulacion' && !new URL(location.href).searchParams.has('area') && document.querySelector('#elective-q')?.value==='simulacion'`);
+  });
+
   await check('Real Tab skip link, focus visibility and desktop keyboard order', async () => {
     await viewport(1280); await navigate('/');
     // Reset focus to document without focusing an individual control.

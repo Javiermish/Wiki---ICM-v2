@@ -12,11 +12,11 @@ export function SiteFooter() {
           <nav aria-label="Pie de página" className="mb-3 flex flex-wrap gap-x-6 sm:justify-end">
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#explorar">Explorar ejemplos</Link>
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/electivos">Electivos</Link>
-            <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/gestion/asignaturas">Gestionar ramos · demo pública</Link>
+            <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/gestion/asignaturas">Solicitar un ramo</Link>
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/moderacion">Moderación · acceso restringido</Link>
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#comunidad">Sobre el proyecto</Link>
           </nav>
-          <p>Hito 2.1 · Cuentas reales configurables. Archivos locales de demostración.</p>
+          <p>Catálogo persistente en PostgreSQL. Archivos locales de demostración.</p>
           <p>No representa la malla oficial de la UdeC.</p>
         </div>
       </div>

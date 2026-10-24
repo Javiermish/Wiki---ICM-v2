@@ -17,10 +17,10 @@ export function CourseContent({ slug, filters, errors }: { slug: string; filters
   const course = catalog.courses.find((entry) => entry.slug === slug);
   if (!course) return (
     <main id="contenido" tabIndex={-1} className="page-container flex-1 pt-6 pb-12 sm:pt-8 sm:pb-16">
-      <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Ramo local no disponible" }]} />
-      <EmptyState title="Ramo local no disponible">
-        <p>Este ramo no está en la memoria de esta demostración. Los cambios locales se pierden al recargar la página o abrir otra sesión; no se guardan ni publican.</p>
-        <Link href="/gestion/asignaturas" className="text-link mt-3 inline-flex min-h-11 items-center rounded font-semibold">Ir a la gestión de ramos · demo local</Link>
+      <Breadcrumbs items={[{ label: "Inicio", href: "/" }, { label: "Ramo no disponible" }]} />
+      <EmptyState title="Ramo no disponible">
+        <p>El ramo no está en el catálogo activo o no pudo consultarse. Recarga la página para consultar su estado actual.</p>
+        <Link href="/" className="text-link mt-3 inline-flex min-h-11 items-center rounded font-semibold">Volver al catálogo</Link>
       </EmptyState>
     </main>
   );
@@ -31,13 +31,13 @@ export function CourseContent({ slug, filters, errors }: { slug: string; filters
   return (
     <main id="contenido" tabIndex={-1} className="page-container flex-1 pt-6 pb-12 sm:pt-8 sm:pb-16">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }, courseParentBreadcrumb(course, catalog.electiveAreas), { label: course.name }]} />
-      <Badge>Ramo de demostración</Badge>
-      {course.code ? <p className="mt-4 text-sm font-medium text-muted-foreground">Código de ejemplo: {course.code}</p> : null}
+      <Badge>Catálogo académico</Badge>
+      {course.code ? <p className="mt-4 text-sm font-medium text-muted-foreground">Código: {course.code}</p> : null}
       <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{course.name}</h1>
       <p className="mt-3 font-medium">{courseClassification(course, catalog.electiveAreas)}</p>
       <div className="mt-4"><FavoriteButton courseId={course.id} courseName={course.name} /></div>
       {course.description ? <p className="mt-2 max-w-2xl text-muted-foreground">{course.description}</p> : null}
-      <p className="mt-2 max-w-2xl text-muted-foreground">Ramo y materiales ficticios: no representan la malla oficial de la UdeC. El período académico de cada documento es independiente del semestre curricular.</p>
+      <p className="mt-2 max-w-2xl text-muted-foreground">Los archivos disponibles son muestras locales. La carga inicial del catálogo es ilustrativa, no la malla oficial de la UdeC. El período académico de cada documento es independiente del semestre curricular.</p>
       {course.status === "archived" ? <div className="mt-4 rounded-xl border border-border bg-muted p-4 text-sm"><p><strong>Ramo archivado.</strong> Sus materiales aprobados siguen disponibles, pero no se preparan nuevos aportes para este ramo.</p><Link href="/gestion/asignaturas" className="text-link mt-2 inline-flex min-h-11 items-center rounded font-semibold">Gestionar ramos · demo local</Link></div> : <Link href={`/aportar?ramo=${encodeURIComponent(course.slug)}`} className="text-link mt-3 inline-flex min-h-11 items-center rounded text-sm font-semibold">Preparar un aporte para este ramo · demo local</Link>}
       <CourseFilters slug={course.slug} filters={filters} years={facets.years} numbers={facets.numbers} />
       <section aria-labelledby="course-materials-heading">

@@ -1,5 +1,7 @@
 # Wiki ICM — Dirección visual y arquitectura de interfaz
 
+> **Hito 2.2 completado y aprobado para V1 (23-10-2026):** se reutiliza el diseño editorial sin reconstrucción. `/admin/ramos` es administración persistente restringida; `/gestion/asignaturas` propone ramos con cuenta verificada y lista solicitudes propias. `/moderacion` separa solicitudes reales de archivos/reportes DEMO. Catálogo público dinámico con Suspense y error explícito sin fallback a fixtures; Proxy de Next.js 16 resuelve ausencias académicas con 404 antes del streaming. Se conservan estilos, foco, confirmaciones y categorías. Catálogo remoto y regresiones públicas comprobados anteriormente; QA adicional de RLS remoto con cuentas temporales diferida con limitación aceptada y procedimientos conservados. Última verificación local y límites: [QA_HITO_2_2.md](QA_HITO_2_2.md). Hito 2.3 no autorizado.
+
 > **Ampliación Hito 2.1:** formularios de registro/login/recuperación/restablecimiento, cuenta y usuarios usan el sistema existente. Cabecera distingue visitante, estudiante, moderador y admin a partir de sesión verificada en servidor. `/moderacion` deja de ser pública, sin convertir su workspace DEMO en moderación real. Favoritos permanecen locales. Las descripciones Hito 1 siguientes son históricas donde contradigan esta ampliación. Ver [HITO_2_1.md](HITO_2_1.md).
 
 ## Personalidad

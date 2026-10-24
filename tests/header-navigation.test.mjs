@@ -49,9 +49,9 @@ for (const role of [null, "student", "moderator", "admin"]) {
     assert.equal(destinations.length, new Set(destinations).size, "Duplicate navigation destination");
     assert.deepEqual(destinations, [
       "/#explorar", "/electivos", "/#materiales", "/#comunidad", "/aportar", "/favoritos",
-      ...(role ? ["/mi-cuenta", "/mis-aportes"] : ["/login", "/registro"]),
+      ...(role ? ["/mi-cuenta", "/mis-aportes", "/gestion/asignaturas"] : ["/login", "/registro"]),
       ...(["moderator", "admin"].includes(role) ? ["/moderacion"] : []),
-      ...(role === "admin" ? ["/admin/usuarios"] : []),
+      ...(role === "admin" ? ["/admin/ramos", "/admin/usuarios"] : []),
     ]);
     assert.equal(mobile.props.signedIn, Boolean(account));
   });

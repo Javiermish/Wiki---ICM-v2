@@ -25,5 +25,5 @@ async function MaterialQuery({ id, searchParams }: { id: string; searchParams: P
   const [file, query] = await Promise.all([materialFileSource.resolve(id), searchParams]);
   const { filters, errors } = parseCourseFilters(query);
   const hasContext = query.tipo !== undefined && !errors.length;
-  return <MaterialContent id={id} file={file} filters={filters} hasContext={hasContext} />;
+  return <MaterialContent id={id} file={file} filters={filters} hasContext={hasContext} sampleTitle={publicMaterialById(getDemoCatalog(), id)?.displayName} />;
 }
