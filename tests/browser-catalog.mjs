@@ -2,7 +2,7 @@
  * Opt-in real Chromium QA, no third-party dependencies and no build/server lifecycle.
  * WIKI_TEST_BASE_URL=http://127.0.0.1:3100 node tests/browser-catalog.mjs
  * Optional: WIKI_CHROME_PATH=/absolute/path/to/chrome
- * Artifacts/profile stay inside this project's .next directory.
+ * Artifacts/profile stay inside .next; short-lived sockets use /tmp/opencode.
  */
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -18,7 +18,9 @@ assert.ok(['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname), 'This fix
 const artifacts = resolve(root, '.next/qa-evidence');
 const profile = resolve(root, '.next/qa-browser-profile');
 const browserHome = resolve(profile, 'home');
-for (const dir of [artifacts, profile, browserHome, resolve(profile, 'config'), resolve(profile, 'cache'), resolve(profile, 'tmp')]) await mkdir(dir, { recursive: true });
+// Chromium's singleton Unix socket must fit Linux's 108-byte path limit.
+const temporary = resolve('/tmp/opencode', `wiki-c-${process.pid}`);
+for (const dir of [artifacts, profile, browserHome, resolve(profile, 'config'), resolve(profile, 'cache'), temporary]) await mkdir(dir, { recursive: true });
 const cacheRoot = resolve(homedir(), '.cache/ms-playwright');
 const cachedVersions = (await readdir(cacheRoot).catch(() => []))
   .filter(name => /^chromium-\d+$/.test(name))
@@ -42,7 +44,7 @@ const materialStatus = `([...document.querySelectorAll('main section [role="stat
 
 async function launch(noSandbox = false) {
   const args = ['--headless', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-breakpad', '--disable-crash-reporter', '--password-store=basic', '--use-mock-keychain', '--window-size=1280,900', ...(noSandbox ? ['--no-sandbox'] : []), 'about:blank'];
-  chrome = spawn(executable, args, { cwd: root, env: { ...process.env, HOME: browserHome, XDG_CONFIG_HOME: resolve(profile, 'config'), XDG_CACHE_HOME: resolve(profile, 'cache'), TMPDIR: resolve(profile, 'tmp') }, stdio: ['ignore', 'ignore', 'pipe'] });
+  chrome = spawn(executable, args, { cwd: root, env: { ...process.env, HOME: browserHome, XDG_CONFIG_HOME: resolve(profile, 'config'), XDG_CACHE_HOME: resolve(profile, 'cache'), TMPDIR: temporary }, stdio: ['ignore', 'ignore', 'pipe'] });
   let stderr = '';
   return await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Chrome startup timeout: ${stderr}`)), 15000);
@@ -280,7 +282,7 @@ try {
     await navigate('/semestres/4');
     assert.ok(await evaluate(`${visibleCards}.length===0 && document.querySelector('main')?.innerText.includes('no hay ramos de ejemplo')`));
     await navigate('/ramos/geometria?tipo=certamenes');
-    assert.ok(await evaluate(`[...document.querySelectorAll('nav[aria-label="Categorías de materiales"] a')].filter(e=>e.getClientRects().length>0).length===3 && ${visibleCards}.length===0`));
+    assert.ok(await evaluate(`[...document.querySelectorAll('nav[aria-label="Categorías de materiales"] a')].filter(e=>e.getClientRects().length>0).length===4 && document.querySelector('nav[aria-label="Categorías de materiales"]').innerText.includes('Tareas') && ${visibleCards}.length===0`));
     await navigate('/?q=MARCADOR_PRIVADO');
     assert.equal(await evaluate(`${visibleCards}.length`), 0);
   });

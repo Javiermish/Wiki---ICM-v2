@@ -37,12 +37,12 @@ test("Cálculo I mantiene malla 1 al aportar Certamen 2 de 2024-2", () => {
 test("recorta strings, convierte números y conserva sección/versión como metadatos secundarios", () => {
   const result = validate({ courseId: ` ${course.id} `, category: " listado ", documentNumber: " 003 ", academicYear: " 2025 ", academicTerm: " 1 ", title: " Ecuaciones ", section: " B ", instructor: " Docente de ejemplo ", version: " Alternativa " });
   assert.equal(result.ok, true);
-  assert.deepEqual(result.value, { courseId: course.id, category: "listado", documentNumber: 3, academicYear: 2025, academicTerm: 1, title: "Ecuaciones", section: "B", instructor: "Docente de ejemplo", version: "Alternativa" });
+  assert.deepEqual(result.value, { courseId: course.id, category: "listado", documentNumber: 3, academicYear: 2025, academicTerm: 1, title: "Ecuaciones", description: null, section: "B", instructor: "Docente de ejemplo", version: "Alternativa" });
   assert.equal(contributionDisplayName(result.value), "Listado 3 - 2025-1");
 });
 
-test("listados y certámenes exigen número; apuntes lo permiten opcional", () => {
-  for (const category of ["listado", "certamen"]) {
+test("listados, certámenes y tareas exigen número; apuntes lo permiten opcional", () => {
+  for (const category of ["listado", "certamen", "tarea"]) {
     for (const documentNumber of ["", " "]) assert.ok(validate({ category, documentNumber }).errors.documentNumber);
   }
   const unnumbered = validate({ category: "apunte", documentNumber: "  " });
@@ -54,6 +54,27 @@ test("listados y certámenes exigen número; apuntes lo permiten opcional", () =
   assert.equal(numbered.ok, true);
   assert.equal(contributionDisplayName(numbered.value), "Apuntes 9 - 2024-2");
   assert.ok(validate({ category: "apunte", documentNumber: "0" }).errors.documentNumber);
+});
+
+test("descripción opcional: normaliza blancos, conserva texto literal y limita a 2000 caracteres", () => {
+  assert.equal(createContributionDraft().description, "");
+  for (const description of ["", " \n\t ", undefined, null]) {
+    const result = validate({ description });
+    assert.equal(result.ok, true);
+    assert.equal(result.value.description, null);
+  }
+  const literal = '<script>alert("x")</script>\nListado 77 - 2099-1';
+  const result = validate({ description: `  ${literal}  `, role: "admin", status: "approved" });
+  assert.equal(result.ok, true);
+  assert.equal(result.value.description, literal, "texto sin interpretar como HTML ni metadatos");
+  assert.equal(contributionDisplayName(result.value), "Certamen 2 - 2024-2");
+  assert.ok(!("role" in result.value));
+  assert.ok(!("status" in result.value));
+  assert.equal(validate({ description: "x".repeat(2000) }).ok, true);
+  assert.equal(validate({ description: `  ${"x".repeat(2000)}  ` }).ok, true);
+  const tooLong = validate({ description: "x".repeat(2001) });
+  assert.equal(tooLong.ok, false);
+  assert.deepEqual(tooLong.errors, { description: "Escribe como máximo 2000 caracteres." });
 });
 
 test("errores por campo: curso inexistente, categorías desconocidas y enteros estrictos", () => {
@@ -137,5 +158,5 @@ test("orientación rechaza ausencia/tipos/extensiones inconsistentes sin leer co
   assert.equal(checkContributionFile(declaredOnly).ok, true);
   assert.match(CONTRIBUTION_FILE_GUIDANCE, /orientativa/);
   assert.match(CONTRIBUTION_FILE_GUIDANCE, /no verifica el contenido ni garantiza seguridad/);
-  assert.match(CONTRIBUTION_FILE_GUIDANCE, /No se sube/);
+  assert.match(CONTRIBUTION_FILE_GUIDANCE, /seleccionar un archivo no lo envía al servidor/);
 });

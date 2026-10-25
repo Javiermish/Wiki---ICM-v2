@@ -33,7 +33,7 @@ export function SemesterSection({ semesters, materials, filters }: { semesters: 
               <Link href={`/semestres/${semester}`} className="inline-flex min-h-11 items-center gap-2 rounded text-sm font-semibold text-primary underline-offset-4 hover:underline">
                 Explorar semestre {semester}<ArrowUpRight className="size-4" aria-hidden="true" />
               </Link>
-              <p className="text-xs text-muted-foreground">{entries.length} {entries.length === 1 ? "material ficticio" : "materiales ficticios"} en este grupo de ejemplo.</p>
+              <p className="text-xs text-muted-foreground">{entries.length} {entries.length === 1 ? "material aprobado" : "materiales aprobados"} en este grupo.</p>
             </section>
           );
         })}

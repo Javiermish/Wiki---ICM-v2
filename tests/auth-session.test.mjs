@@ -4,14 +4,17 @@ import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
 import { NextRequest, NextResponse } from 'next/server.js';
 import { safeNext, isRole } from '../src/domain/auth.ts';
+import { demoCatalog } from '../src/fixtures/catalog.ts';
+import { publicMaterialById } from '../src/lib/catalog/query.ts';
 
 // Load production modules with SDK/Next boundaries replaced, no remote service.
 async function load(path, imports, bindings) {
   let source = await readFile(new URL(path, import.meta.url),'utf8');
   source = source.replace(/^import .* from "next\/server";$/gm, '');
+  source = source.replace(/^import .* from "\.\/lib\/catalog\/(?:data|query)";$/gm, '');
   for (const pattern of imports) source = source.replace(pattern,'');
   const js = ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
-  const dependencies = { connection: async () => {}, ...bindings };
+  const dependencies = { connection: async () => {}, getDemoCatalog: () => demoCatalog, publicMaterialById, ...bindings };
   return new Function(...Object.keys(dependencies), `${js.replaceAll('export ', '')}; return ${path.endsWith('proxy.ts') ? '{proxy}' : '{getAccount,getAccountResult,requireAccount,requireRole}'};`)(...Object.values(dependencies));
 }
 

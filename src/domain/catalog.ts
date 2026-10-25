@@ -1,9 +1,9 @@
 /** Proyección del dominio para el prototipo; no es autorización ni esquema SQL. */
 export type AcademicTerm = 1 | 2;
-export type MaterialCategory = "listado" | "apunte" | "certamen";
+export type MaterialCategory = "listado" | "apunte" | "certamen" | "tarea";
 export type ModerationStatus = "pending" | "approved" | "rejected";
 /** Categorías disponibles aun cuando un ramo todavía no tiene documentos. */
-export const materialCategories = ["listado", "apunte", "certamen"] as const;
+export const materialCategories = ["listado", "apunte", "certamen", "tarea"] as const;
 
 export interface ElectiveArea {
   readonly id: string;
@@ -38,6 +38,7 @@ interface MaterialBase {
   readonly id: string;
   readonly offeringId: string;
   readonly title: string | null;
+  readonly description?: string | null;
   /** Solo fixtures internos/privados: OMITIR al serializar el catálogo público. */
   readonly originalFilename?: string;
   readonly submittedAt?: string;
@@ -47,7 +48,7 @@ interface MaterialBase {
 }
 
 export type Material = MaterialBase & (
-  | { readonly category: "certamen" | "listado"; readonly documentNumber: number }
+  | { readonly category: "certamen" | "listado" | "tarea"; readonly documentNumber: number }
   | { readonly category: "apunte"; readonly documentNumber: number | null }
 );
 
@@ -64,7 +65,7 @@ export type PublicCatalogMaterial = Omit<MaterialBase, "status" | "originalFilen
   readonly originalFilename?: never;
   readonly submittedAt?: never;
 } & (
-  | { readonly category: "certamen" | "listado"; readonly documentNumber: number }
+  | { readonly category: "certamen" | "listado" | "tarea"; readonly documentNumber: number }
   | { readonly category: "apunte"; readonly documentNumber: number | null }
 );
 

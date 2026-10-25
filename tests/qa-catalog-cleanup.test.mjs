@@ -24,7 +24,7 @@ test('QA cleanup template fails closed and deletes only its exact manifest local
   try {
     await pg.initialise(); await pg.start();
     client = pg.getPgClient(); await client.connect();
-    await client.query(`create role anon; create role authenticated; create schema auth;
+    await client.query(`create role anon; create role authenticated; create role service_role bypassrls; create schema auth;
       create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz,
         created_at timestamptz default now(), raw_user_meta_data jsonb);
       create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;

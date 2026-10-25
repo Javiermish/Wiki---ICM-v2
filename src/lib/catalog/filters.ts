@@ -20,8 +20,8 @@ export function parseCatalogFilters(params: SearchParameters): { filters: Catalo
       if (value.length > 200) errors.push("Búsqueda: escribe como máximo 200 caracteres.");
       else filters.q = value;
     } else if (key === "category") {
-      if (["listado", "apunte", "certamen"].includes(value)) filters.category = value as MaterialCategory;
-      else errors.push("Tipo de material: elige Listados, Apuntes o Certámenes.");
+      if (["listado", "apunte", "certamen", "tarea"].includes(value)) filters.category = value as MaterialCategory;
+      else errors.push("Tipo de material: elige Listados, Apuntes, Certámenes o Tareas.");
     } else {
       const bounds = { curricularSemester: [1, 20], year: [1900, 2100], term: [1, 2], number: [1, 999] } as const;
       const [min, max] = bounds[key];

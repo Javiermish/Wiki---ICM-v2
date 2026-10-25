@@ -50,7 +50,7 @@ export function CourseContent({ slug, filters, errors }: { slug: string; filters
             <Link href={clearHref} className="text-link mt-2 inline-flex min-h-11 items-center rounded text-sm font-semibold">Limpiar filtros</Link>
           </div>
         ) : <>
-          <p role="status" aria-live="polite" aria-atomic="true" className="mb-5 text-sm text-muted-foreground">{materials.length} {materials.length === 1 ? "material ficticio encontrado" : "materiales ficticios encontrados"}. Solo ejemplos aprobados. Abre una ficha para consultar los archivos de demostración disponibles.</p>
+          <p role="status" aria-live="polite" aria-atomic="true" className="mb-5 text-sm text-muted-foreground">{materials.length} {materials.length === 1 ? "material encontrado" : "materiales encontrados"}. Solo materiales aprobados. Las muestras se identifican como DEMO.</p>
           {materials.length ? <ul className="space-y-3">{materials.map((material) => <li key={material.id}><MaterialCard material={material} courseFilters={filters} /></li>)}</ul> : (
             <EmptyState title={facets.count ? "No encontramos materiales con estos filtros" : "Aún no hay ejemplos en esta categoría"}>
               <p>{facets.count ? "Prueba con otro período académico o combina menos filtros." : "Puedes explorar otra categoría. La ausencia de ejemplos no significa que el ramo no tenga material en la realidad."}</p>

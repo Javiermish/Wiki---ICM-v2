@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig } from "./lib/supabase/config";
+import { getDemoCatalog } from "./lib/catalog/data";
+import { publicMaterialById } from "./lib/catalog/query";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -14,6 +16,9 @@ export async function proxy(request: NextRequest) {
     // Resolve the status before Suspense can flush headers; keep refreshed cookies.
     return NextResponse.rewrite(new URL("/404", request.url), { status: 404, headers });
   };
+  const materialId = request.nextUrl.pathname.match(/^\/materiales\/([^/]+)\/?$/)?.[1];
+  // Demo absence must also be resolved before the layout can stream HTTP 200.
+  if (materialId?.startsWith("demo-") && !publicMaterialById(getDemoCatalog(), materialId)) return notFoundResponse();
   const config = getSupabaseConfig();
   if (!config) return invalidSemester ? notFoundResponse() : response;
   const supabase = createServerClient(config.url, config.key, {
@@ -38,6 +43,11 @@ export async function proxy(request: NextRequest) {
     const { data, error } = await supabase.from("courses").select("id")
       .eq("slug", decodedSlug).eq("status", "active").maybeSingle();
     // A failed lookup is not evidence of absence: let the page show its DB error.
+    if (!error && !data) return notFoundResponse();
+  }
+  if (materialId !== undefined && !materialId.startsWith("demo-")) {
+    if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(materialId)) return notFoundResponse();
+    const { data, error } = await supabase.from("public_materials").select("id").eq("id", materialId).maybeSingle();
     if (!error && !data) return notFoundResponse();
   }
   return response;

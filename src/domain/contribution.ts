@@ -11,13 +11,14 @@ export interface ContributionDraft {
   readonly academicYear: string;
   readonly academicTerm: string;
   readonly title: string;
+  readonly description: string;
   readonly section: string;
   readonly instructor: string;
   readonly version: string;
 }
 
 export function createContributionDraft(): ContributionDraft {
-  return { courseId: "", category: "", documentNumber: "", academicYear: "", academicTerm: "", title: "", section: "", instructor: "", version: "" };
+  return { courseId: "", category: "", documentNumber: "", academicYear: "", academicTerm: "", title: "", description: "", section: "", instructor: "", version: "" };
 }
 
 export type ContributionFieldErrors = Partial<Record<keyof ContributionDraft, string>>;
@@ -28,11 +29,12 @@ export type ContributionMetadata = {
   readonly academicYear: number;
   readonly academicTerm: AcademicTerm;
   readonly title: string | null;
+  readonly description?: string | null;
   readonly section?: string;
   readonly instructor?: string;
   readonly version?: string;
 } & (
-  | { readonly category: "listado" | "certamen"; readonly documentNumber: number }
+  | { readonly category: "listado" | "certamen" | "tarea"; readonly documentNumber: number }
   | { readonly category: "apunte"; readonly documentNumber: number | null }
 );
 
@@ -58,24 +60,26 @@ export function validateContributionDraft(draft: ContributionDraft, courses: rea
   const academicTerm = integerInRange(stringValue(draft.academicTerm), 1, 2);
   const documentNumber = integerInRange(rawNumber, 1, 999);
   const title = stringValue(draft.title);
+  const description = stringValue(draft.description);
   const section = stringValue(draft.section);
   const instructor = stringValue(draft.instructor);
   const version = stringValue(draft.version);
 
   if (!courses.some((course) => course.id === courseId && course.status === "active")) errors.courseId = "Elige un ramo existente y activo.";
-  if (!["listado", "apunte", "certamen"].includes(category)) errors.category = "Elige Listados, Apuntes o Certámenes.";
+  if (!["listado", "apunte", "certamen", "tarea"].includes(category)) errors.category = "Elige Listados, Apuntes, Certámenes o Tareas.";
   if (academicYear === null) errors.academicYear = "Usa un año académico entero entre 1900 y 2100.";
   if (academicTerm === null) errors.academicTerm = "Elige el semestre académico 1 o 2, no el de malla.";
-  if ((rawNumber !== "" || category === "listado" || category === "certamen") && documentNumber === null) {
+  if ((rawNumber !== "" || category === "listado" || category === "certamen" || category === "tarea") && documentNumber === null) {
     errors.documentNumber = "Usa un número entero entre 1 y 999.";
   }
   if (title.length > 200) errors.title = "Escribe como máximo 200 caracteres.";
+  if (description.length > 2000) errors.description = "Escribe como máximo 2000 caracteres.";
   if (section.length > 80) errors.section = "Escribe como máximo 80 caracteres.";
   if (instructor.length > 120) errors.instructor = "Escribe como máximo 120 caracteres.";
   if (version.length > 80) errors.version = "Escribe como máximo 80 caracteres.";
   if (Object.keys(errors).length) return { ok: false, errors };
 
-  const base = { courseId, academicYear: academicYear!, academicTerm: academicTerm as AcademicTerm, title: title || null,
+  const base = { courseId, academicYear: academicYear!, academicTerm: academicTerm as AcademicTerm, title: title || null, description: description || null,
     ...(section ? { section } : {}), ...(instructor ? { instructor } : {}), ...(version ? { version } : {}) };
   const value: ContributionMetadata = category === "apunte"
     ? { ...base, category, documentNumber }
@@ -90,7 +94,7 @@ export function contributionDisplayName(metadata: ContributionMetadata): string 
 
 export const DEFAULT_CONTRIBUTION_MAX_BYTES = 25 * 1024 * 1024;
 export const CONTRIBUTION_FILE_ACCEPT = ".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp";
-export const CONTRIBUTION_FILE_GUIDANCE = "La revisión local de tamaño, tipo declarado y extensión es orientativa; no verifica el contenido ni garantiza seguridad. No se sube ningún archivo en esta demo.";
+export const CONTRIBUTION_FILE_GUIDANCE = "La revisión local de tamaño, tipo declarado y extensión es orientativa; no verifica el contenido ni garantiza seguridad. La previsualización es local; seleccionar un archivo no lo envía al servidor.";
 
 /** File del navegador satisface esta interfaz sin leer ni conservar sus bytes. */
 export interface ContributionFileSelection {

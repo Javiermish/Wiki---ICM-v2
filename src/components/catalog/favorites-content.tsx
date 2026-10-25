@@ -42,7 +42,7 @@ export function FavoritesContent() {
       <h3 id="favorite-courses-heading" className="text-xl font-semibold">Asignaturas</h3>
       <p role="status" className="text-sm text-muted-foreground">{courses.length} {courses.length === 1 ? "asignatura guardada" : "asignaturas guardadas"}: regulares y electivas.</p>
       {courses.length ? <ul className="grid gap-4 sm:grid-cols-2">{courses.map(course => <li key={course.id} onFocusCapture={() => { focusedReference.current = { kind: "course", id: course.id }; }}>
-        <CourseCard course={course} counts={{ listado: courseFacets(catalog, course.id, "listado").count, apunte: courseFacets(catalog, course.id, "apunte").count, certamen: courseFacets(catalog, course.id, "certamen").count }} />
+        <CourseCard course={course} counts={{ listado: courseFacets(catalog, course.id, "listado").count, apunte: courseFacets(catalog, course.id, "apunte").count, certamen: courseFacets(catalog, course.id, "certamen").count, tarea: courseFacets(catalog, course.id, "tarea").count }} />
       </li>)}</ul> : <EmptyState title="Todavía no has guardado asignaturas"><p>Guarda un ramo regular o electivo desde su tarjeta o ficha.</p><Link href="/#explorar" className="text-link mt-3 inline-flex min-h-11 items-center">Explorar asignaturas</Link><Link href="/electivos" className="text-link ml-5 inline-flex min-h-11 items-center">Ver electivos</Link></EmptyState>}
     </section>
     <section aria-labelledby="favorite-materials-heading" className="space-y-4">

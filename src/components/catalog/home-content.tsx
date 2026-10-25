@@ -46,9 +46,9 @@ export function HomeContent({ filters, errors }: { filters: CatalogFilters; erro
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
             <h2 id="materials-heading" className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">{searching ? "Resultados de tu búsqueda" : "Materiales para explorar"}</h2>
-            <p className="mt-2 text-muted-foreground">{filters.q ? <>Consulta: «{filters.q}». </> : null}Ejemplos aprobados en el catálogo ficticio. Abre un material para leer y descargar los archivos de demostración disponibles.</p>
+            <p className="mt-2 text-muted-foreground">{filters.q ? <>Consulta: «{filters.q}». </> : null}Solo materiales aprobados. Abre una ficha para leer y descargar; las muestras de prueba se identifican como DEMO.</p>
           </div>
-          {searching ? <Link className="text-link inline-flex min-h-11 items-center rounded text-sm font-semibold" href="/#materiales">Restablecer búsqueda</Link> : <Badge>Catálogo de demostración</Badge>}
+          {searching ? <Link className="text-link inline-flex min-h-11 items-center rounded text-sm font-semibold" href="/#materiales">Restablecer búsqueda</Link> : <Badge>Catálogo académico</Badge>}
         </div>
         {errors.length ? (
           <div role="alert" className="rounded-xl border border-destructive bg-card p-6">
@@ -63,10 +63,10 @@ export function HomeContent({ filters, errors }: { filters: CatalogFilters; erro
               <p role="status" aria-live="polite" aria-atomic="true" className="mt-2 text-sm text-muted-foreground">{courses.length} {courses.length === 1 ? "asignatura encontrada" : "asignaturas encontradas"}, incluso sin materiales.</p>
               {courses.length ? <ul className="mt-3 divide-y divide-border">{courses.map((course) => <li key={course.id} className="py-2"><Link href={`/ramos/${course.slug}`} className="text-link inline-flex min-h-11 items-center rounded font-semibold">{course.name}{course.code ? ` · ${course.code}` : ""}</Link><p className="text-sm text-muted-foreground">{courseClassification(course, catalog.electiveAreas)}</p></li>)}</ul> : <p className="mt-3 text-sm text-muted-foreground">Prueba con otro nombre o código de asignatura.</p>}
             </section> : null}
-            <p role="status" aria-live="polite" aria-atomic="true" className="mb-4 text-sm text-muted-foreground">{materials.length} {materials.length === 1 ? "material ficticio encontrado" : "materiales ficticios encontrados"}.</p>
+            <p role="status" aria-live="polite" aria-atomic="true" className="mb-4 text-sm text-muted-foreground">{materials.length} {materials.length === 1 ? "material encontrado" : "materiales encontrados"}.</p>
             {materials.length ? <ul className="space-y-3">{materials.map((material) => <li key={material.id}><MaterialCard material={material} /></li>)}</ul> : (
-              <EmptyState title="No encontramos materiales de ejemplo">
-                <p>Prueba con otro ramo o combina menos filtros. Que no haya ejemplos no significa que el ramo no exista en la malla.</p>
+              <EmptyState title="No encontramos materiales">
+                <p>Prueba con otro ramo o combina menos filtros. Un ramo puede no tener materiales publicados todavía.</p>
                 <Link href="/#materiales" className="text-link mt-3 inline-flex min-h-11 items-center rounded font-semibold">Limpiar búsqueda y filtros</Link>
               </EmptyState>
             )}
@@ -82,9 +82,9 @@ export function HomeContent({ filters, errors }: { filters: CatalogFilters; erro
             <p className="mt-4 max-w-lg text-muted-foreground">Wiki ICM nace como una biblioteca hecha entre estudiantes. Queremos que encontrar material sea sencillo y que el conocimiento siga circulando.</p>
           </div>
           <div className="space-y-6 lg:pt-2">
-            <div className="flex gap-4"><BookOpen className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Lectura abierta, sin registro</h3><p className="mt-1 text-sm text-muted-foreground">El material aprobado será público. Esta portada usa únicamente ejemplos ficticios.</p></div></div>
+            <div className="flex gap-4"><BookOpen className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Lectura abierta, sin registro</h3><p className="mt-1 text-sm text-muted-foreground">Los materiales aprobados se pueden consultar sin cuenta. Los pendientes y rechazados permanecen privados.</p></div></div>
             <div className="flex gap-4"><ShieldCheck className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h3 className="font-semibold">Compartir con cuidado</h3><p className="mt-1 text-sm text-muted-foreground">Cada aporte pasará por revisión humana antes de publicarse. Solo se aceptará material autorizado.</p></div></div>
-            <div className="space-y-3 rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><p><strong className="text-foreground">Prepara un aporte en una demostración local.</strong> Las cuentas usan autenticación real cuando está configurada; no hay subidas ni publicaciones reales. Los favoritos se conservan en este navegador, sin sincronizarse con cuentas, y los reportes son simulados.</p><Link href="/aportar" className="text-link inline-flex min-h-11 items-center rounded font-semibold">Preparar un aporte</Link></div>
+            <div className="space-y-3 rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground"><p><strong className="text-foreground">Comparte material autorizado.</strong> Aportar requiere una cuenta verificada y almacenamiento configurado. Los favoritos se conservan en este navegador, sin sincronizarse con cuentas, y los reportes son simulados.</p><Link href="/aportar" className="text-link inline-flex min-h-11 items-center rounded font-semibold">Preparar un aporte</Link></div>
           </div>
         </div>
       </section>

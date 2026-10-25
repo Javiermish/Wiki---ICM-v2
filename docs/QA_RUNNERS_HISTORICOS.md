@@ -34,7 +34,11 @@ Con servidor **local** ya iniciado y catálogo público disponible:
 WIKI_TEST_BASE_URL=http://127.0.0.1:3103 pnpm test:browser
 ```
 
-Enumera explícitamente las seis suites vigentes: Auth, materiales, catálogo, favoritos, aportes y catálogo persistente en modo `public`. No usa `browser-*.mjs`, no incluye runners históricos ni QA autenticada. Se detiene ante el primer runner fallido.
+Enumera explícitamente las siete suites vigentes: Auth, materiales, catálogo, favoritos, aportes, catálogo persistente en modo `public` y Tareas. No usa `browser-*.mjs`, no incluye runners históricos ni QA autenticada. Ejecuta todas y devuelve fallo agregado si alguna falla.
+
+Para reproducirlas sin depender de datos/credenciales remotos, usar `pnpm test:local`.
+Construye y cierra su propio servidor local con fixtures de solo lectura; también
+ejecuta HTTP y catálogo en error. Ver [QA_REGRESIONES_2_3.md](QA_REGRESIONES_2_3.md).
 
 El modo de caída se ejecuta por separado únicamente en un servidor local deliberadamente sin catálogo; no retirar tablas ni interrumpir Supabase para forzarlo:
 

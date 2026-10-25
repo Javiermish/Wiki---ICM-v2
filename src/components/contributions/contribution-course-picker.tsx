@@ -23,7 +23,7 @@ export function ContributionCoursePicker({ courses, value, error, onChange }: {
     <div>
       <label htmlFor="contribution-course-search" className="mb-2 block text-sm font-medium">Buscar ramo por nombre o código</label>
       <input id="contribution-course-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} className="field" placeholder="Por ejemplo: Cálculo" aria-describedby="contribution-course-hint" />
-      <p id="contribution-course-hint" className="mt-2 text-sm text-muted-foreground">Ramos ficticios de demostración; no representan la malla oficial.</p>
+      <p id="contribution-course-hint" className="mt-2 text-sm text-muted-foreground">El catálogo puede contener ramos ilustrativos; no representa necesariamente la malla oficial.</p>
     </div>
     <p role="status" aria-live="polite" className="text-sm text-muted-foreground">{filtered.length} {filtered.length === 1 ? "ramo encontrado" : "ramos encontrados"}.</p>
     <fieldset id="contribution-courseId" tabIndex={-1} aria-invalid={Boolean(error)} aria-describedby={error ? "contribution-courseId-error" : undefined}>

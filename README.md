@@ -1,4 +1,16 @@
-# Wiki ICM — Hito 2.1
+# Wiki ICM — Hito 2.3 completado para V1
+
+**Cierre aprobado por el usuario (24-10-2026):** integración manual real con Supabase y Cloudflare R2: Tarea PDF subida, metadatos persistidos, aprobación/publicación, visualización y descarga; segundo aporte Listado rechazado y oculto del catálogo público. Consulta directa a Supabase confirmó `approved`/`rejected`, cargas `ready` y auditoría correspondiente. Evidencia reportada por el operador, no una nueva ejecución remota del agente.
+
+**Estado vigente:** Hito 2.3 completado para V1, incluida la cuarta categoría Tareas. Se conservan migraciones aplicadas, RLS, moderación y R2 privado. Favoritos siguen locales y reportes DEMO. Resultados automatizados y limitaciones, sin convertir pendientes en pruebas aprobadas: [docs/HITO_2_3.md](docs/HITO_2_3.md). Este estado prevalece sobre las descripciones históricas inferiores. Sin despliegue ni inicio del Hito 2.4.
+
+## Roadmap V1
+
+- [x] Hito 1 — interfaz y prototipo, con ampliaciones hasta 1.5.
+- [x] Hito 2.1 — cuentas y roles.
+- [x] Hito 2.2 — catálogo académico persistente, aprobado para V1.
+- [x] Hito 2.3 — materiales reales Supabase/R2 y moderación, completado para V1 (24-10-2026).
+- [ ] Hito 2.4 — no iniciado; requiere autorización independiente.
 
 Catálogo navegable de una biblioteca colaborativa de Ingeniería Civil Matemática.
 **Prototipo con datos ficticios: los ramos no representan la malla oficial de la UdeC.**
@@ -13,8 +25,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Abrir <http://localhost:3000>. El catálogo público funciona sin credenciales.
-Las cuentas reales requieren Supabase y las variables de `.env.example`.
+Abrir <http://localhost:3000>. Lectura pública sin iniciar sesión; catálogo y cuentas requieren Supabase configurado. Los materiales reales requieren además la migración y las variables privadas de servidor/R2 de `.env.example`.
 Configuración de correo, migraciones, administrador inicial y pruebas: [docs/HITO_2_1.md](docs/HITO_2_1.md).
 Si Auth funciona pero faltan perfiles/roles, aplicar manualmente `supabase/migrations/202610220001_profiles_roles.sql` una sola vez y después `202610220002_backfill_existing_accounts.sql` (reejecutable). Orden, precauciones y consultas de verificación: [docs/AUTH_SQL.md](docs/AUTH_SQL.md). No borrar ni registrar de nuevo la cuenta existente.
 Las fuentes son locales del sistema; no se descargan fuentes de Google.
@@ -37,6 +48,19 @@ WIKI_TEST_BASE_URL=http://localhost:3000 pnpm test
 Sin esa variable se omiten las suites HTTP. Las pruebas de catálogo,
 contraste de tokens y tema con APIs simuladas no necesitan servidor ni navegador.
 
+**Regresión completa sin servicios remotos (recomendada antes del commit):**
+
+```bash
+pnpm test:local
+```
+
+Construye con fixtures REST loopback y ejecuta HTTP, las siete suites vigentes
+de navegador y el catálogo en error. Requiere Chromium existente y puerto 3123
+libre, no `.env.local`, Supabase remoto ni R2. Informe y SQL/concurrencia local:
+[docs/QA_REGRESIONES_2_3.md](docs/QA_REGRESIONES_2_3.md).
+El build generado es de QA: repetir `pnpm build` con la configuración normal
+antes de usar `pnpm start` con servicios reales.
+
 La comprobación de navegador es opcional, usa Chrome/Chromium existente vía CDP
 y no requiere instalar Playwright:
 
@@ -44,10 +68,14 @@ y no requiere instalar Playwright:
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-catalog.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-materials.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 WIKI_CHROME_PATH=/ruta/a/chrome node tests/browser-contributions.mjs
-WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-courses.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-favorites.mjs
 WIKI_TEST_BASE_URL=http://localhost:3000 node tests/browser-auth.mjs
+WIKI_TEST_BASE_URL=http://localhost:3000 pnpm test:browser
 ```
+
+`test:browser` ejecuta las siete suites y agrega fallos sin detenerse en la primera.
+Los runners históricos de gestión/moderación públicas no forman parte del lote;
+ver [docs/QA_RUNNERS_HISTORICOS.md](docs/QA_RUNNERS_HISTORICOS.md).
 
 Capturas e informes locales en `.next/qa-evidence/`, `.next/qa-materials-evidence/`,
 `.next/qa-contributions-evidence/`, `.next/qa-courses-evidence/`,
@@ -150,7 +178,7 @@ aprobados**. Los nuevos ramos usan `/ramos/local-<uuid>`. El servidor entrega un
 HTTP 200 para ese prefijo válido incluso si no existe en la memoria cliente; muestra
 ausencia explícita, no una ficha inventada. Slugs normales desconocidos mantienen 404.
 
-En las rutas de ramo se usan `tipo=listados|apuntes|certamenes`, `anio`, `periodo`
+En las rutas de ramo se usan `tipo=listados|apuntes|certamenes|tareas`, `anio`, `periodo`
 y `numero`. Se reutilizan las validaciones académicas de la portada, cuyo contrato
 URL anterior se conserva. Parámetros desconocidos se ignoran; conocidos inválidos
 o repetidos muestran errores y no devuelven materiales. Sin `tipo` se abre Listados.

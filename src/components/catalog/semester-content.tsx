@@ -35,7 +35,7 @@ export function SemesterContent({ semester, filters, errors }: { semester: numbe
           <p role="status" aria-live="polite" aria-atomic="true" className="mb-5 text-sm text-muted-foreground">{courses.length} {courses.length === 1 ? "ramo ficticio encontrado" : "ramos ficticios encontrados"}.{filters.q ? ` Búsqueda: «${filters.q}».` : ""}</p>
           {courses.length ? <ul className="grid gap-4 md:grid-cols-2">{courses.map((course) => {
             const materials = courseMaterials(catalog, course.id);
-            const counts = { listado: 0, apunte: 0, certamen: 0 };
+            const counts = { listado: 0, apunte: 0, certamen: 0, tarea: 0 };
             materials.forEach((material) => { counts[material.category] += 1; });
             return <li key={course.id}><CourseCard course={course} counts={counts} /></li>;
           })}</ul> : (

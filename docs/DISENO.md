@@ -1,5 +1,7 @@
 # Wiki ICM — Dirección visual y arquitectura de interfaz
 
+> **Hito 2.3 completado para V1 (24-10-2026):** el usuario confirmó el ciclo real Supabase/R2 de Tarea PDF aprobada/publicada con visualización y descarga, y Listado rechazado oculto del catálogo público. Se conservan paleta, temas, lector y componentes: `/aportar` con cuenta verificada/progreso real, `/mis-aportes` con estados propios y `/moderacion` con materiales reales separados de ejercicios DEMO. Solo `approved AND ready` se publica. Evidencia, regresiones automatizadas y límites: [HITO_2_3.md](HITO_2_3.md). Este estado prevalece sobre las notas históricas inferiores; Hito 2.4 no iniciado. No implica una auditoría integral de accesibilidad.
+
 > **Hito 2.2 completado y aprobado para V1 (23-10-2026):** se reutiliza el diseño editorial sin reconstrucción. `/admin/ramos` es administración persistente restringida; `/gestion/asignaturas` propone ramos con cuenta verificada y lista solicitudes propias. `/moderacion` separa solicitudes reales de archivos/reportes DEMO. Catálogo público dinámico con Suspense y error explícito sin fallback a fixtures; Proxy de Next.js 16 resuelve ausencias académicas con 404 antes del streaming. Se conservan estilos, foco, confirmaciones y categorías. Catálogo remoto y regresiones públicas comprobados anteriormente; QA adicional de RLS remoto con cuentas temporales diferida con limitación aceptada y procedimientos conservados. Última verificación local y límites: [QA_HITO_2_2.md](QA_HITO_2_2.md). Hito 2.3 no autorizado.
 
 > **Ampliación Hito 2.1:** formularios de registro/login/recuperación/restablecimiento, cuenta y usuarios usan el sistema existente. Cabecera distingue visitante, estudiante, moderador y admin a partir de sesión verificada en servidor. `/moderacion` deja de ser pública, sin convertir su workspace DEMO en moderación real. Favoritos permanecen locales. Las descripciones Hito 1 siguientes son históricas donde contradigan esta ampliación. Ver [HITO_2_1.md](HITO_2_1.md).
@@ -14,7 +16,7 @@ Tipografía sans legible para UI; titulares claros y jerarquía 32-48/24/18/14 p
 ## Pantallas Hito 1
 1. `/`: hero con buscador, accesos por semestre curricular, últimos aportes aprobados simulados y CTA para aportar.
 2. `/semestres/[semestre]`: listado de ramos; campo de búsqueda local.
-3. `/ramos/[slug]`: ficha de ramo, tabs `Listados | Apuntes | Certámenes`, filtros Año y Periodo académico, tarjetas con número y fecha.
+3. `/ramos/[slug]`: ficha de ramo, categorías `Listados | Apuntes | Certámenes | Tareas`, filtros Año y Periodo académico, tarjetas con número y fecha. Tareas es la cuarta incluso sin documentos; enlaces con wrapping móvil, no categorías ocultas.
 4. `/materiales/[id]`: en Hito 1.3 autorizado, cabecera, breadcrumbs, lector PDF/imagen real y descarga de archivos originales de demostración; ficha sin archivo muestra disponibilidad explicativa, nunca un visor ficticio.
 5. `/aportar`: diseño de formulario con ramo, categoría, número, año, semestre académico, archivos y aviso de moderación.
 6. `/moderacion`: demo pública sin protección real; tres colas de aportes, solicitudes y reportes, con filtros, consulta, corrección, confirmaciones e historial. La versión real requerirá autorización servidor.
@@ -55,7 +57,7 @@ Capturas a 375, 768, 1280 y 1440px; modo claro/oscuro; keyboard tab; foco; contr
 Descripción histórica: Hito 1.5 sustituye únicamente la política de favoritos en memoria por referencias locales persistidas. Gestión y moderación siguen en memoria; ver [HITO_1_5.md](HITO_1_5.md).
 
 - Mantener la biblioteca como lenguaje principal, no convertir el sitio completo en un dashboard. Electivos distingue cinco áreas ilustrativas (Numérico, Discreta, Optimización, Estadística y Otro) con títulos, contador y vacío útil. Un electivo no se ubica artificialmente en un semestre de malla; su breadcrumb vuelve a `/electivos?area=…`.
-- Todas las fichas conservan las tres categorías, incluso con cero documentos; las categorías no se ocultan por ausencia de materiales.
+- Todas las fichas conservan las cuatro categorías, incluso con cero documentos; las categorías no se ocultan por ausencia de materiales.
 - Gestión muestra aviso persistente de **demo pública sin login**, datos ficticios y cambios que se pierden al recargar. Evitar insignias de administrador autenticado, candados que sugieran protección real o promesas de publicación. Solicitudes para usuarios registrados/revisión humana se explican como futuras, sin falso envío.
 - Formulario con nombre, código opcional, tipo, semestre curricular 1–12 solo para regulares, área existente solo para electivos y descripción opcional. ID y ruta son consultables, no editables. Mostrar duplicados exactos como errores y aproximados como avisos con los ramos coincidentes.
 - Consultar activos/archivados, confirmar archivo y permitir reabrir. Explicar que conserva enlaces y documentos; archivar un ramo no equivale a retirar un material aprobado. Reclasificación actualiza etiquetas/breadcrumbs sin regenerar URLs ni fechas académicas.

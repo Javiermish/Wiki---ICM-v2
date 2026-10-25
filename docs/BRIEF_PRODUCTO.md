@@ -1,5 +1,9 @@
 # Wiki ICM — Brief de producto
 
+> **Cierre 24-10-2026 — Hito 2.3 completado para V1:** el usuario confirmó integración real Supabase/R2: Tarea PDF aprobada, publicada, visualizada y descargada; Listado rechazado y oculto del catálogo público. Consulta directa confirmó estados, cargas `ready` y auditoría. Tareas (`tarea`) es la cuarta categoría. Evidencia y limitaciones: [HITO_2_3.md](HITO_2_3.md). Este cierre prevalece sobre las notas históricas inferiores; Hito 2.4 no iniciado.
+
+> Aportes y moderación persistentes con RLS y R2 privado; se conservan migraciones aplicadas y controles de revisión. Favoritos locales y reportes DEMO siguen siendo limitaciones, no funcionalidades de cuenta/backend aprobadas.
+
 > **Hito 2.2 completado y aprobado para V1 (23-10-2026):** catálogo académico, administración y solicitudes en PostgreSQL con RLS. Archivos/reportes siguen DEMO y favoritos locales. Pruebas adicionales de RLS remoto con cuentas temporales diferidas por decisión expresa, con limitación aceptada y procedimientos conservados. Seguridad intacta; última verificación local y evidencia previa: [QA_HITO_2_2.md](QA_HITO_2_2.md). Hito 2.3 no autorizado. Las notas inferiores son históricas donde contradigan este estado.
 
 ## Propósito
@@ -12,7 +16,7 @@ Biblioteca colaborativa de Ingeniería Civil Matemática (UdeC) para encontrar, 
 
 ## Funciones no negociables (v1)
 - Índice por semestres curriculares y ramos, con electivos agrupados por área sin semestre curricular obligatorio.
-- Listados, Apuntes y Certámenes dentro de cada ramo.
+- Listados, Apuntes, Certámenes y Tareas dentro de cada ramo.
 - Etiquetas públicas normalizadas, con número y periodo académico real (`Certamen 2 - 2024-2`).
 - Visor PDF/imagen incorporado y botón de descarga.
 - Formulario de aportes con verificación humana previa a publicación.

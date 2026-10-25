@@ -9,7 +9,7 @@ test("rutas y HTML del prototipo", { skip: !base }, async (t) => {
     ["/?q=calculo", 5, "Resultados de tu búsqueda"],
     ["/?q=Certamen+2+-+2024-2", 2, "Certamen 2 - 2024-2"],
     ["/?q=calculo&curricularSemester=1&category=certamen&year=2024&term=2&number=2", 2, "Certamen 2 - 2024-2"],
-    ["/?q=calculo&curricularSemester=2&category=certamen&year=2024&term=2&number=2", 0, "No encontramos materiales de ejemplo"],
+    ["/?q=calculo&curricularSemester=2&category=certamen&year=2024&term=2&number=2", 0, "No encontramos materiales"],
     ["/?curricularSemester=4", 0, "Todavía no hay ramos de ejemplo en este semestre"],
     ["/?q=sin-coincidencias", 0, "Limpiar búsqueda y filtros"],
     ["/?q=", 9, "Materiales para explorar"],

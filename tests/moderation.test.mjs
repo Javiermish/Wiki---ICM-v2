@@ -45,6 +45,10 @@ test("corregir metadatos revalida ramo y período, comparte nombres y conserva e
   assert.equal(moderation.moderationMaterialName(result.value), "Listado 3 - 2025-1");
   assert.deepEqual(result.event.previous, material.metadata);
   assert.deepEqual(result.event.next, result.value.metadata);
+  const task = moderation.correctMaterialMetadata(material, draft({ category: "tarea", academicYear: "2025", academicTerm: "1" }), catalog, "Clasificación como tarea", context);
+  assert.equal(moderation.moderationMaterialName(task.value), "Tarea 2 - 2025-1");
+  assert.equal(task.value.status, "pending");
+  assert.throws(() => moderation.correctMaterialMetadata(material, draft({ category: "tarea", documentNumber: "" }), catalog, "Corrección", context));
   for (const invalid of [{ academicTerm: "8" }, { courseId: "unknown" }, { documentNumber: "" }]) assert.throws(() => moderation.correctMaterialMetadata(material, draft(invalid), catalog, "Corrección", context));
   assert.throws(() => moderation.correctMaterialMetadata({ ...material, status: "approved" }, draft(), catalog, "Corrección", context));
 });

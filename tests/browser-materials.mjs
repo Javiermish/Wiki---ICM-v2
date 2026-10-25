@@ -18,7 +18,9 @@ assert.ok(['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname), 'This fix
 const artifacts = resolve(root, '.next/qa-materials-evidence');
 const profile = resolve(root, '.next/qa-m-profile');
 const browserHome = resolve(profile, 'home');
-for (const dir of [artifacts, profile, browserHome, resolve(profile, 'config'), resolve(profile, 'cache'), resolve(profile, 'tmp')]) await mkdir(dir, { recursive: true });
+// Chromium's singleton Unix socket must fit Linux's 108-byte path limit.
+const temporary = resolve('/tmp/opencode', `wiki-m-${process.pid}`);
+for (const dir of [artifacts, profile, browserHome, resolve(profile, 'config'), resolve(profile, 'cache'), temporary]) await mkdir(dir, { recursive: true });
 const cacheRoot = resolve(homedir(), '.cache/ms-playwright');
 const cachedVersions = (await readdir(cacheRoot).catch(() => []))
   .filter(name => /^chromium-\d+$/.test(name))
@@ -42,7 +44,7 @@ const visibleCards = `([...document.querySelectorAll('main article')].filter(e =
 
 async function launch() {
   const args = ['--headless', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-breakpad', '--disable-crash-reporter', '--password-store=basic', '--use-mock-keychain', '--window-size=1280,900', 'about:blank'];
-  chrome = spawn(executable, args, { cwd: root, env: { ...process.env, HOME: browserHome, XDG_CONFIG_HOME: resolve(profile, 'config'), XDG_CACHE_HOME: resolve(profile, 'cache'), TMPDIR: resolve(profile, 'tmp') }, stdio: ['ignore', 'ignore', 'pipe'] });
+  chrome = spawn(executable, args, { cwd: root, env: { ...process.env, HOME: browserHome, XDG_CONFIG_HOME: resolve(profile, 'config'), XDG_CACHE_HOME: resolve(profile, 'cache'), TMPDIR: temporary }, stdio: ['ignore', 'ignore', 'pipe'] });
   let stderr = '';
   return await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Chrome startup timeout: ${stderr}`)), 15000);
@@ -575,7 +577,7 @@ try {
   console.error(`BLOCKED ${error.stack}`);
 } finally {
   report.limitations.push('Computed contrast samples cover opaque UI text only, not PDF/image contents, alpha compositing or a full WCAG audit.');
-  report.limitations.push('Fixture-only checks are not authorization/RLS, upload validation or real moderation tests; no backend/users exist in this milestone.');
+  report.limitations.push('This public-fixture suite does not verify authenticated backend/users, RLS, private R2 or real moderation; SQL and service suites cover those boundaries separately.');
   report.finished = new Date().toISOString();
   report.summary = { passed: report.checks.filter(row => row.pass).length, failed: report.checks.filter(row => !row.pass).length, screenshots: report.screenshots.length, browserErrors: report.browserErrors.length, expectedErrors: report.expectedErrors.length, networkFailures: report.networkFailures.length };
   await writeFile(resolve(artifacts, 'browser-materials-report.json'), JSON.stringify(report, null, 2));

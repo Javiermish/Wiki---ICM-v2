@@ -16,7 +16,7 @@ export function SiteFooter() {
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/moderacion">Moderación · acceso restringido</Link>
             <Link className="inline-flex min-h-11 items-center hover:text-primary" href="/#comunidad">Sobre el proyecto</Link>
           </nav>
-          <p>Catálogo persistente en PostgreSQL. Archivos locales de demostración.</p>
+          <p>Catálogo persistente en PostgreSQL. Materiales con revisión humana; muestras identificadas como DEMO.</p>
           <p>No representa la malla oficial de la UdeC.</p>
         </div>
       </div>

@@ -26,7 +26,7 @@ test("un electivo sin documentos entra en buscador, áreas y aportes desde la mi
   assert.ok(searchCourses(catalog, { electiveAreaId: "estadistica" }).some((entry) => entry.id === course.id));
   const draft = { ...createContributionDraft(), courseId: course.id, category: "apunte", academicYear: "2025", academicTerm: "2" };
   assert.equal(validateContributionDraft(draft, searchCourses(catalog)).ok, true);
-  for (const category of ["listado", "apunte", "certamen"]) assert.deepEqual(courseMaterials(catalog, course.id, { category }), []);
+  for (const category of ["listado", "apunte", "certamen", "tarea"]) assert.deepEqual(courseMaterials(catalog, course.id, { category }), []);
   assert.equal(courseClassification(course, catalog.electiveAreas), "Electivo · Estadística");
   assert.equal(courseParentBreadcrumb(course, catalog.electiveAreas).href, "/electivos?area=estadistica");
   assert.ok(!catalogFacets(catalog).curricularSemesters.includes(null));

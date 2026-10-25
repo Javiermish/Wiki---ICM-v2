@@ -9,6 +9,8 @@ import { getPublicDemoCatalog } from "./data";
 import { attachExampleMaterials, courseFromRow } from "./rows";
 import type { PublicCatalog } from "@/domain/catalog";
 import { requestPageSize, type RequestStatusFilter } from "./request-pagination";
+import { readApprovedMaterialRows } from "@/lib/materials/persistent";
+import { attachPersistentMaterials } from "@/lib/materials/rows";
 
 export const courseColumns = "id,slug,curriculum_id,name,code,description,kind,curricular_semester,elective_area_id,status,version";
 export const catalogUnavailable = "No se pudo cargar el catálogo desde PostgreSQL. Comprueba la conexión y las migraciones e inténtalo de nuevo. No se muestran ramos de demostración como reemplazo.";
@@ -20,13 +22,18 @@ async function readCatalog(client: SupabaseClient, includeArchived = false): Pro
   const courses = [];
   for (let offset = 0; ; offset += 500) {
     const result = await query.range(offset, offset + 499);
-    if (result.error || !result.data) throw new Error(catalogUnavailable);
+    if (result.error || !result.data) throw new Error(catalogUnavailable, { cause: result.error });
     courses.push(...result.data.map(courseFromRow));
     if (result.data.length < 500) break;
   }
   const areas = await client.from("elective_areas").select("id,name").order("position");
-  if (areas.error || !areas.data) throw new Error(catalogUnavailable);
-  return attachExampleMaterials(courses, areas.data, getPublicDemoCatalog());
+  if (areas.error || !areas.data) throw new Error(catalogUnavailable, { cause: areas.error });
+  const rows = await readApprovedMaterialRows(client);
+  // Samples remain explicitly DEMO; they never replace a failed persistent query.
+  const catalog = process.env.WIKI_ENABLE_DEMO_MATERIALS === "true"
+    ? attachExampleMaterials(courses, areas.data, getPublicDemoCatalog())
+    : { courses, electiveAreas: areas.data, offerings: [], materials: [] };
+  return attachPersistentMaterials(catalog, rows);
 }
 
 /** Request-only deduplication: no authenticated cookies, no shared role cache. */

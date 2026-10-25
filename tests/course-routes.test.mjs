@@ -59,7 +59,7 @@ test("catálogo persistente y favoritos: HTTP con seed inicial aplicado", { skip
     }
     const elective = await page("/ramos/electivo-numerico");
     assert.ok(elective.includes('href="/electivos?area=numerico"'));
-    for (const category of ["Listados", "Apuntes", "Certámenes"]) assert.ok(elective.includes(category));
+    for (const category of ["Listados", "Apuntes", "Certámenes", "Tareas"]) assert.ok(elective.includes(category));
     assert.equal((elective.match(/<article\b/g) ?? []).length, 0);
     assert.ok(!elective.includes("semestres/null"));
   });
@@ -73,7 +73,7 @@ test("catálogo persistente y favoritos: HTTP con seed inicial aplicado", { skip
     for (const path of ["/ramos/no-existe", "/ramos/local-", "/ramos/local-qa-course-unavailable"]) {
       const response = await request(path);
       const html = await response.text();
-      assert.ok([200, 404].includes(response.status), "Next puede emitir notFound después de comenzar streaming");
+      assert.equal(response.status, 404, path);
       assert.ok(html.includes("No encontramos esta página"));
     }
     for (const path of ["/semestres/0", "/semestres/13", "/semestres/01", "/semestres/1.0", "/materiales/no-existe", "/materiales/demo-pending-calculo", "/materiales/demo-rejected-calculo"]) await page(path, 404);

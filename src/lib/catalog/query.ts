@@ -1,7 +1,7 @@
 import type { Catalog, CatalogFilters, Course, CourseOffering, Material, PublicMaterial } from "../../domain/catalog";
 
-export const categoryLabels = { listado: "Listados", apunte: "Apuntes", certamen: "Certámenes" } as const;
-const singularLabels = { listado: "Listado", apunte: "Apuntes", certamen: "Certamen" } as const;
+export const categoryLabels = { listado: "Listados", apunte: "Apuntes", certamen: "Certámenes", tarea: "Tareas" } as const;
+const singularLabels = { listado: "Listado", apunte: "Apuntes", certamen: "Certamen", tarea: "Tarea" } as const;
 
 export function normalizeSearch(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").trim();
@@ -27,7 +27,7 @@ export function approvedMaterials(catalog: Catalog): PublicMaterial[] {
       category: material.category,
       documentNumber: material.documentNumber,
       displayName: materialDisplayName(material, offering),
-      description: material.title,
+      description: [material.title, material.description].filter(Boolean).join(" · ") || null,
       academicYear: offering.academicYear,
       academicTerm: offering.academicTerm,
       academicPeriod: `${offering.academicYear}-${offering.academicTerm}`,

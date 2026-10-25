@@ -6,6 +6,7 @@ import { courseFromRow, attachExampleMaterials } from "../src/lib/catalog/rows.t
 import { demoCatalog } from "../src/fixtures/catalog.ts";
 import { toPublicCatalog } from "../src/lib/catalog/public-catalog.ts";
 import { requestPageSize, requestPagination } from "../src/lib/catalog/request-pagination.ts";
+import { attachPersistentMaterials } from "../src/lib/materials/rows.ts";
 
 async function reader({ unavailable = false } = {}) {
   const events = [];
@@ -29,6 +30,7 @@ async function reader({ unavailable = false } = {}) {
     createClient: async () => { events.push("authenticated-client"); return client; },
     requireAccount: async () => ({ id: "owner" }), requireRole: async () => ({ id: "reviewer" }), requestPageSize,
     getPublicDemoCatalog: () => toPublicCatalog(demoCatalog), courseFromRow, attachExampleMaterials,
+    readApprovedMaterialRows: async () => [], attachPersistentMaterials,
   };
   return { api: new Function(...Object.keys(bindings), `${js}; return { getPublicCatalog, listCourseRequests };`)(...Object.values(bindings)), events };
 }

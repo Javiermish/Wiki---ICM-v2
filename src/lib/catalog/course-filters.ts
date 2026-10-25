@@ -1,8 +1,8 @@
 import type { CatalogFilters, MaterialCategory } from "../../domain/catalog";
 import { parseCatalogFilters, type SearchParameters } from "./filters.ts";
 
-export const courseCategoryValues = { listado: "listados", apunte: "apuntes", certamen: "certamenes" } as const;
-const categories: Record<string, MaterialCategory> = { listados: "listado", apuntes: "apunte", certamenes: "certamen" };
+export const courseCategoryValues = { listado: "listados", apunte: "apuntes", certamen: "certamenes", tarea: "tareas" } as const;
+const categories: Record<string, MaterialCategory> = { listados: "listado", apuntes: "apunte", certamenes: "certamen", tareas: "tarea" };
 
 /** Contrato público del ramo. No acepta ni altera el semestre curricular. */
 export function parseCourseFilters(params: SearchParameters): { filters: CatalogFilters; errors: string[] } {
@@ -11,7 +11,7 @@ export function parseCourseFilters(params: SearchParameters): { filters: Catalog
   const parsed = parseCatalogFilters({ year: params.anio, term: params.periodo, number: params.numero });
   const errors = [...parsed.errors];
   if (Array.isArray(type)) errors.unshift("Tipo de material: usa un solo valor.");
-  else if (type?.trim() && !category) errors.unshift("Tipo de material: elige Listados, Apuntes o Certámenes.");
+  else if (type?.trim() && !category) errors.unshift("Tipo de material: elige Listados, Apuntes, Certámenes o Tareas.");
   return { filters: { ...parsed.filters, category: category ?? "listado" }, errors };
 }
 

@@ -3,12 +3,14 @@ import test from 'node:test';
 import { readFile, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 
-test('suite habitual enumera solo seis runners vigentes, sin QA remota ni históricos', async () => {
+test('suite habitual enumera los siete runners vigentes, incluida Tareas, sin detenerse al primer fallo', async () => {
   const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
-  const runners = [...pkg.scripts['test:browser'].matchAll(/node tests\/(browser-[\w-]+\.mjs)/g)].map(m => m[1]).sort();
-  assert.deepEqual(runners, ['browser-auth.mjs', 'browser-catalog.mjs', 'browser-contributions.mjs', 'browser-favorites.mjs', 'browser-materials.mjs', 'browser-persistent-catalog.mjs']);
-  assert.match(pkg.scripts['test:browser'], /WIKI_CATALOG_QA_MODE=public/);
-  assert.doesNotMatch(pkg.scripts['test:browser'], /\*|historical|qa-authenticated/);
+  assert.equal(pkg.scripts['test:browser'], 'node tests/run-browser-suites.mjs');
+  const source = await readFile(new URL('./run-browser-suites.mjs', import.meta.url), 'utf8');
+  const runners = [...source.matchAll(/'browser-([\w-]+)\.mjs'/g)].map(m => m[1]).sort();
+  assert.deepEqual(runners, ['auth', 'catalog', 'contributions', 'favorites', 'materials', 'persistent-catalog', 'tasks']);
+  assert.match(source, /WIKI_CATALOG_QA_MODE: 'public'/);
+  assert.doesNotMatch(source, /historical|qa-authenticated|break;/);
 });
 
 test('runners retirados no abren navegador ni sobrescriben evidencia al invocarlos', async () => {

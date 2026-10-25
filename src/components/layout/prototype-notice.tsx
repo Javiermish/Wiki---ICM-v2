@@ -6,7 +6,7 @@ export function PrototypeNotice() {
       <div className="page-container flex gap-2.5 py-3 text-sm text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <p><strong className="font-semibold text-foreground">Prototipo con datos ficticios.</strong>{" "}
-          La carga inicial contiene ramos ilustrativos, no la malla oficial de la UdeC. Catálogo y solicitudes se consultan en PostgreSQL; los archivos y su moderación siguen siendo demostrativos. Los favoritos siguen siendo locales, sin sincronización.</p>
+          La carga inicial contiene ramos ilustrativos, no la malla oficial de la UdeC. Los aportes reales requieren almacenamiento configurado y revisión humana. Las muestras se identifican como DEMO. Favoritos locales, sin sincronización; reportes simulados.</p>
       </div>
     </aside>
   );

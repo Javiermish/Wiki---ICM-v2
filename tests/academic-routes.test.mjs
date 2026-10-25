@@ -6,9 +6,9 @@ const privateMarkers = ["MARCADOR_PRIVADO", "demo-pending-calculo", "demo-reject
 
 async function page(path, status = 200) {
   const response = await fetch(new URL(path, base));
-  assert.ok(response.status === status || (status === 404 && path.startsWith("/ramos/") && response.status === 200), path);
+  assert.equal(response.status, status, path);
   const html = await response.text();
-  if (status === 404 && path.startsWith("/ramos/")) assert.ok(html.includes("No encontramos esta página"), "404 semántico incluso tras streaming");
+  if (status === 404) assert.ok(html.includes("No encontramos esta página"));
   // Next puede reflejar el segmento solicitado en el estado del router de un 404.
   // Eso no es información obtenida del catálogo: no confundirlo con una fuga.
   for (const marker of privateMarkers.filter((marker) => !path.includes(marker))) {
@@ -29,7 +29,7 @@ test("navegación HTTP de semestres, ramos, categorías y filtros", { skip: !bas
     const course = await page("/ramos/calculo-i");
     assert.ok(course.includes('href="/semestres/1"'));
     assert.ok(course.includes("Cálculo I"));
-    for (const category of ["Listados", "Apuntes", "Certámenes"]) assert.ok(course.includes(category));
+    for (const category of ["Listados", "Apuntes", "Certámenes", "Tareas"]) assert.ok(course.includes(category));
   });
 
   await t.test("buscador local por nombre y código y semestre vacío", async () => {

@@ -2,7 +2,14 @@
 
 Sin Supabase remoto, sin credenciales de aplicación y sin modificar datos existentes.
 
+HTTP y las siete suites públicas de navegador ahora pueden ejecutarse con
+`pnpm test:local`, sin `.env.local`, usando un doble REST loopback de solo lectura.
+Incluye catálogo disponible y en error, no reemplaza las pruebas SQL nativas de
+esta guía. Diagnóstico y resultados: [QA_REGRESIONES_2_3.md](QA_REGRESIONES_2_3.md).
+
 ## PostgreSQL real y efímero
+
+**Tareas 24-10-2026:** runner incluye `202610240001_material_tasks.sql` y `supabase/tests/material_tasks.sql`. Crea una fila anterior solo en el clúster efímero y compara preservación, oferta, funciones, ACL/RLS y demás restricciones. PostgreSQL 18.4 PASS: `/tmp/opencode/wiki-sql-qa-ghj4gh/report.json`. No valida R2 ni Supabase remoto; [detalle](HITO_2_3_TAREAS.md).
 
 El runner `scripts/run-catalog-sql-tests.mjs` crea **su propio clúster**, enlazado a
 `127.0.0.1`, en un directorio nuevo `/tmp/opencode/wiki-sql-qa-*`. Usa una contraseña
@@ -20,12 +27,18 @@ WIKI_EMBEDDED_POSTGRES_MODULE=/tmp/opencode/wiki-postgres-harness/node_modules/e
 node scripts/run-catalog-sql-tests.mjs
 ```
 
+Si npm bloqueó el postinstall del paquete nativo y `initdb` falla con
+`libpq.so.5`, ejecutar `node scripts/hydrate-symlinks.js` dentro de
+`/tmp/opencode/wiki-postgres-harness/node_modules/@embedded-postgres/linux-x64`
+(o el paquete de la arquitectura correspondiente) y repetir. Solo reconstruye
+symlinks del paquete temporal; no requiere permisos del sistema.
+
 En el entorno QA de esta sesión **ya existe** una instalación reutilizable:
 `/tmp/opencode/wiki-catalog-sql/node_modules/embedded-postgres/dist/index.js`.
 No fue necesario descargar PostgreSQL ni instalar paquetes del sistema.
 
 Se ejecutan todas las migraciones ordenadas, el inspector readonly de seed y después `profiles_roles.sql`,
-`backfill_existing_accounts.sql`, `catalog.sql`, `catalog_quotas.sql`, `catalog_seed.sql`. Finalmente `scripts/test-catalog-concurrency.mjs` comprueba cuota y doble aprobación con dos conexiones, observando el bloqueo real en `pg_stat_activity`. Cada archivo usa una conexión
+`backfill_existing_accounts.sql`, `catalog.sql`, `catalog_quotas.sql`, `catalog_seed.sql`, `materials.sql`, `materials_quotas.sql` y `materials_budgets.sql`. Finalmente `scripts/test-catalog-concurrency.mjs` y `scripts/test-materials-concurrency.mjs` comprueban cuotas, idempotencia, presupuesto de intentos, leases, limpieza y doble aprobación con dos conexiones, observando el bloqueo real en `pg_stat_activity`. Cada archivo usa una conexión
 independiente; sus `COMMIT`/`ROLLBACK` se conservan. Se expande `\ir` relativo al
 archivo que lo contiene y se admite `\set ON_ERROR_STOP on`; cualquier otro
 metacomando falla explícitamente. Un fallo SQL finaliza con código 1.

@@ -6,6 +6,7 @@ export function toPublicCatalog(catalog: Catalog): PublicCatalog {
     if (material.status !== "approved") return [];
     const base = {
       id: material.id, offeringId: material.offeringId, title: material.title, status: "approved" as const,
+      ...(material.description ? { description: material.description } : {}),
       ...(material.section ? { section: material.section } : {}),
       ...(material.version ? { version: material.version } : {}),
     };

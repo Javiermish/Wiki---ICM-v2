@@ -13,7 +13,7 @@ type FieldErrors = Partial<Record<keyof CourseInput, string>>;
 const emptyInput: CourseInput = {
   name: "", code: "", kind: "regular", curricularSemester: "", electiveAreaId: "", description: "",
 };
-const categories = ["listado", "apunte", "certamen"] as const;
+const categories = ["listado", "apunte", "certamen", "tarea"] as const;
 
 function courseInput(course: Course): CourseInput {
   return {
@@ -46,7 +46,7 @@ function CourseDetails({ course, catalog }: { course: Course; catalog: Catalog }
     </dl>
     <h4 className="mt-5 text-sm font-semibold">Materiales aprobados: {materials.length}</h4>
     <ul className="mt-2 flex flex-wrap gap-2 text-sm">{categories.map((category) => <li key={category} className="rounded-lg bg-muted px-3 py-2">{categoryLabels[category]}: {materials.filter((material) => material.category === category).length}</li>)}</ul>
-    <p className="mt-3 text-sm text-muted-foreground">Las tres categorías existen aunque estén vacías. No se cuentan ni muestran materiales pendientes o rechazados.</p>
+    <p className="mt-3 text-sm text-muted-foreground">Las cuatro categorías existen aunque estén vacías. No se cuentan ni muestran materiales pendientes o rechazados.</p>
     <Link href={`/ramos/${course.slug}`} className="text-link mt-2 inline-flex min-h-11 items-center">Abrir ramo: {course.name}</Link>
   </details>;
 }

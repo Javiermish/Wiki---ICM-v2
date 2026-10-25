@@ -32,7 +32,7 @@ test("fixtures preservan seis regulares y once materiales, con electivos sin sem
     assert.ok(!demoCatalog.offerings.some((offering) => offering.courseId === course.id));
   }
   assert.deepEqual(initialElectiveAreas.map((area) => area.id), ["numerico", "discreta", "optimizacion", "estadistica", "otro"]);
-  assert.deepEqual(materialCategories, ["listado", "apunte", "certamen"]);
+  assert.deepEqual(materialCategories, ["listado", "apunte", "certamen", "tarea"]);
 });
 
 test("normaliza blancos, Unicode, código opcional y descripción sin aceptar campos de identidad", () => {

@@ -1,5 +1,9 @@
 # Modelo de dominio — catálogo propuesto y cuentas Hito 2.1
 
+> **Cierre 24-10-2026 — Hito 2.3 completado para V1:** cuarta categoría `tarea`, número obligatorio y mismo flujo privado de revisión. El usuario confirmó Tarea aprobada/publicada con lectura y descarga reales, Listado rechazado fuera del catálogo público y consulta SQL con `approved`/`rejected`, cargas `ready` y auditoría. Se conservan las migraciones aplicadas, incluida la incremental de Tareas, sin editarlas ni reaplicarlas en este cierre. [Evidencia y límites](HITO_2_3.md) prevalecen sobre las notas históricas inferiores. Hito 2.4 no iniciado.
+
+> **Modelo vigente Hito 2.3:** `course_offerings`, `materials`, `material_review_events` y presupuesto privado de intentos. Carga `uploading/ready/failed` separada de moderación `pending/approved/rejected`; finalización exclusiva del validador servidor y publicación transaccional con auditoría. Vista pública allowlist, RLS privada y R2 privado intactos.
+
 > **Hito 2.2 completado y aprobado para V1 (23-10-2026):** `curricula`, `elective_areas`, `courses`, solicitudes y eventos tienen migraciones implementadas. IDs académicos de texto conservan rutas/referencias anteriores; nuevas identidades UUID serializadas, slugs inmutables, clasificación SQL y duplicados por plan. RLS y revisión atómica se conservan intactas; documentos permanecen locales, sin nuevas tablas/almacenamiento de archivos. Las propuestas históricas inferiores se interpretan con [HITO_2_2.md](HITO_2_2.md). El operador informa las cuatro migraciones aplicadas; lectura pública remota comprobada anteriormente. QA adicional de RLS remoto con cuentas temporales diferida por decisión expresa, limitación aceptada y procedimientos conservados: [QA_HITO_2_2.md](QA_HITO_2_2.md). Hito 2.3 no autorizado.
 
 > **Hito 2.1:** únicamente cuentas tienen migración SQL implementada. `profiles(id, display_name, created_at, updated_at)` referencia `auth.users`; `user_roles(user_id, role)` separa permisos de campos editables; `role_change_events` registra cambios administrativos. Registro siempre student; confirmación obligatoria; roles consultados en DB, no metadata. Ver `supabase/migrations` y [AUTH_SQL.md](AUTH_SQL.md). El modelo académico siguiente sigue siendo propuesta/fixtures, no DB implementada. Archivos futuros en Cloudflare R2, no Supabase Storage.
@@ -11,7 +15,7 @@
 - `courses`: id, code, name, slug, kind(regular/elective), curricular_semester NULLABLE, elective_area_id NULLABLE, curriculum_id, description NULLABLE, status(active/archived). Restricciones y evolución multi-plan al final; una tabla puente será necesaria si el mismo ramo pertenece a varios planes.
 - `elective_areas`: id estable y nombre; cinco áreas ilustrativas iniciales, desacopladas de los ramos.
 - `course_offerings`: id, course_id, academic_year, academic_term; UNIQUE(course_id, academic_year, academic_term). Edición del ramo en el periodo efectivamente dictado.
-- `materials`: id, offering_id, category enum(listado,apunte,certamen), document_number NULLABLE, title NULLABLE, original_filename, normalized_display_name, optional_section, optional_instructor, mime_verified, bytes, storage_object_key, status(pending/approved/rejected), uploaded_by, submitted_at, reviewed_at, reviewed_by, rejection_reason.
+- `materials`: id, offering_id, category enum(listado,apunte,certamen,tarea), document_number NULLABLE, title NULLABLE, original_filename, normalized_display_name, optional_section, optional_instructor, mime_verified, bytes, storage_object_key, status(pending/approved/rejected), uploaded_by, submitted_at, reviewed_at, reviewed_by, rejection_reason.
 - `profiles`: id ligado a auth.users, display_name, role(student/moderator/admin). Autorización servidor/RLS.
 - `favorites`: user_id y destino exclusivo course_id/material_id; unicidad por usuario/destino, FK y RLS propias (detalle Hito 1.5 al final).
 - `reports`: id, material_id, reporter_id, reason, status, created_at, handled_by.
@@ -27,6 +31,7 @@ Nombre visible: `Certamen 2 - 2024-2`. No mover Cálculo I al semestre 2 de mall
 ## Reglas de nomenclatura
 - Categoría `certamen`: "Certamen N - AAAA-S".
 - Categoría `listado`: "Listado N - AAAA-S".
+- Categoría `tarea`: "Tarea N - AAAA-S" (descarga PDF: `Tarea 2 - 2025-1.pdf`). Número obligatorio 1–999; sección, profesor y versión opcionales, sin cambiar el nombre base.
 - Categoría `apunte`: "Apuntes - AAAA-S" o "Apuntes [N] - AAAA-S" si corresponde; título descriptivo secundario opcional.
 - Identidad del registro por UUID, no por el título. Múltiples secciones/profesores pueden compartir mismo tipo y periodo.
 - El año académico y el semestre se eligen en formulario; validar ambos.
@@ -57,7 +62,7 @@ Filtros por año, término, categoría y número se pueden combinar; búsqueda t
 
 ## Preparación de aportes Hito 1.4
 - `src/domain/contribution.ts` define borrador, metadatos válidos y errores por campo sin depender de React. El ramo referencia un ID existente; año/término son de la edición académica, independientes de la malla.
-- Número obligatorio en listados/certámenes y opcional en apuntes. Sección, profesor y versión opcionales; sin restricción de unicidad por tipo/número/período.
+- Número obligatorio en listados/certámenes/tareas y opcional en apuntes. Sección, profesor y versión opcionales; sin restricción de unicidad por tipo/número/período.
 - `contributionDisplayName` comparte `materialDisplayName`; este recibe solo los campos necesarios, sin crear registros ni IDs ficticios. El formato permitido aporta la extensión canónica.
 - Política local de selección única hasta 25 MiB, configurable. MIME/extensión y firmas mínimas orientan UX; no son validación de servidor.
 - `ContributionService.submit(ContributionSubmission)` y `ContributionReceipt` son contratos futuros sin adaptador ni llamadas. La identidad y el estado `pending` deberán establecerse y autorizarse en servidor, con email verificado, RLS y Storage privado.
@@ -78,7 +83,7 @@ Nombre, código opcional, plan, descripción opcional, ID, slug y `status: activ
 
 Los nuevos ramos DEMO usan UUID y slug `local-${id}`; los IDs/slugs de fixtures anteriores permanecen intactos. Editar nombre, semestre, tipo o área no cambia identidad, slug, ofertas, documentos ni favoritos. El repositorio no elimina: archivar/reabrir solo cambia estado, retira/restaura selectores activos y **no despublica materiales aprobados**. No se interpreta `archived` como una autorización de borrado ni como estado de moderación del documento.
 
-`materialCategories` y `categoryLabels` son el diccionario compartido de Listados, Apuntes y Certámenes. Cada ramo presenta sus tres vistas aunque estén vacías: no requiere filas nuevas de categoría por ramo, materiales ficticios ni ofertas sin motivo. Un futuro lookup global de tipos puede reemplazar/extender el enum; no duplicar las categorías por asignatura.
+`materialCategories` y `categoryLabels` son el diccionario compartido de Listados, Apuntes, Certámenes y Tareas. Cada ramo presenta sus cuatro vistas aunque estén vacías: no requiere filas nuevas de categoría por ramo, materiales ficticios ni ofertas sin motivo. Un futuro lookup global de tipos puede reemplazar/extender el enum; no duplicar las categorías por asignatura.
 
 ### Proyección pública y estado DEMO
 

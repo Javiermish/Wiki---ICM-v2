@@ -16,7 +16,7 @@ export function SearchForm({ filters, years }: { filters: CatalogFilters; years:
         </div>
         <Button type="submit" className="min-h-12 bg-background px-6 text-foreground hover:bg-secondary">Buscar</Button>
       </div>
-      <p id="search-hint" className="mt-2 text-sm text-[var(--hero-muted)]">Solo materiales aprobados ficticios. También puedes buscar un período como 2024-2.</p>
+      <p id="search-hint" className="mt-2 text-sm text-[var(--hero-muted)]">Solo materiales aprobados. También puedes buscar un período como 2024-2.</p>
       <details open={expanded || undefined} className="mt-4">
         <summary className="w-fit min-h-11 rounded-md py-2 text-sm font-semibold underline-offset-4 hover:underline">
           <SlidersHorizontal className="mr-2 inline size-4" aria-hidden="true" />Afinar búsqueda (opcional)

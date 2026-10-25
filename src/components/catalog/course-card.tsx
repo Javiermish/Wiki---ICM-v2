@@ -20,7 +20,7 @@ export function CourseCard({ course, counts }: { course: Course; counts: Record<
           <li key={category}><Link href={courseHref(course.slug, { category })} className="text-link inline-flex min-h-11 items-center gap-2 rounded text-sm"><span>{categoryLabels[category]}</span><span className="text-muted-foreground">({counts[category]})</span></Link></li>
         ))}
       </ul>
-      <p className="mt-2 text-xs text-muted-foreground">Recuentos de materiales aprobados ficticios.</p>
+      <p className="mt-2 text-xs text-muted-foreground">Recuentos de materiales aprobados.</p>
       <div className="mt-4"><FavoriteButton courseId={course.id} courseName={course.name} /></div>
     </article>
   );

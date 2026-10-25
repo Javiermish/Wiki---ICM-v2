@@ -80,7 +80,7 @@ export class ModerationMetadataError extends Error {
 }
 
 export function metadataDraft(metadata: ContributionMetadata): ContributionDraft {
-  return { courseId: metadata.courseId, category: metadata.category, documentNumber: metadata.documentNumber?.toString() ?? "", academicYear: String(metadata.academicYear), academicTerm: String(metadata.academicTerm), title: metadata.title ?? "", section: metadata.section ?? "", instructor: metadata.instructor ?? "", version: metadata.version ?? "" };
+  return { courseId: metadata.courseId, category: metadata.category, documentNumber: metadata.documentNumber?.toString() ?? "", academicYear: String(metadata.academicYear), academicTerm: String(metadata.academicTerm), title: metadata.title ?? "", description: metadata.description ?? "", section: metadata.section ?? "", instructor: metadata.instructor ?? "", version: metadata.version ?? "" };
 }
 
 export function correctMaterialMetadata(material: ReviewMaterial, draft: ContributionDraft, catalog: Catalog, reason: string, context: EventContext): { value: ReviewMaterial; event: ModerationEvent } {
