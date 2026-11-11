@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { dirname, join, sep } from "node:path";
+import { dirname, join } from "node:path";
 import test from "node:test";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { demoCatalog } from "../src/fixtures/catalog.ts";
@@ -9,7 +9,8 @@ import { demoMaterialFiles } from "../src/fixtures/material-files.ts";
 import { publicMaterialById } from "../src/lib/catalog/query.ts";
 
 const require = createRequire(import.meta.url);
-const standardFontDataUrl = join(dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts") + sep;
+// PDF.js exige "/" final incluso en Windows.
+const standardFontDataUrl = join(dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts").replaceAll("\\", "/") + "/";
 
 test("public/demo solo contiene muestras explícitas asociadas a materiales aprobados", async () => {
   const entries = await readdir(new URL("../public/demo/", import.meta.url), { withFileTypes: true });

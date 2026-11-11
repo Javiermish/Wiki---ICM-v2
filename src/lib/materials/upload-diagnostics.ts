@@ -1,4 +1,4 @@
-type UploadStage = "configuration" | "supabase_budget" | "catalog" | "supabase_reserve" | "r2_put" | "supabase_finalize";
+type UploadStage = "configuration" | "supabase_budget" | "catalog" | "supabase_reserve" | "r2_sign" | "supabase_load" | "r2_read" | "discard" | "supabase_finalize";
 
 /** Temporary opt-in diagnostics: never serialize errors, messages, identifiers or payloads. */
 export function logMaterialUploadFailure(stage: UploadStage, error: unknown): void {

@@ -12,10 +12,10 @@ test('diagnóstico opt-in conserva códigos DB/R2, nunca mensajes ni objetos de 
     logMaterialUploadFailure('supabase_reserve', { code: '22023' });
     assert.equal(logs.length, 0);
     process.env.WIKI_MATERIAL_UPLOAD_DIAGNOSTICS = 'true';
-    logMaterialUploadFailure('r2_put', new Error('private filename', { cause: {
+    logMaterialUploadFailure('r2_read', new Error('private filename', { cause: {
       name: 'AccessDenied', $metadata: { httpStatusCode: 403 }, message: 'secret token',
     } }));
-    assert.deepEqual(logs.pop(), ['[material-upload]', { stage: 'r2_put', code: 'AccessDenied', status: 403 }]);
+    assert.deepEqual(logs.pop(), ['[material-upload]', { stage: 'r2_read', code: 'AccessDenied', status: 403 }]);
     logMaterialUploadFailure('supabase_reserve', { code: 'PGRST202', details: 'private data' });
     assert.equal(logs.pop()[1].code, 'PGRST202');
     logMaterialUploadFailure('catalog', { code: 'private-token', name: 'private-filename' });

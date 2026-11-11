@@ -1,10 +1,11 @@
 import 'server-only';
-import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const maxBytes = 25 * 1024 * 1024;
 const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const keyPattern = new RegExp(`^materials/${uuid}/${uuid}\\.(pdf|jpg|png|webp)$`);
+const formats: Record<string, string> = { pdf: 'application/pdf', jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
 const storageError = () => new Error('No se pudo acceder al archivo. Inténtalo nuevamente.');
 
 function configuration() {
@@ -24,23 +25,24 @@ export function isR2Configured(): boolean {
 function object(key: string) {
   if (!keyPattern.test(key)) throw storageError();
   const config = configuration();
-  const client = new S3Client({ endpoint: config.endpoint, region: 'auto', maxAttempts: 2, requestHandler: { requestTimeout: 60_000, connectionTimeout: 5_000, throwOnRequestTimeout: true }, credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey } });
+  const client = new S3Client({ endpoint: config.endpoint, region: 'auto', maxAttempts: 2,
+    // Presigned browser PUTs cannot carry SDK-computed default checksums; R2 recommends WHEN_REQUIRED.
+    requestChecksumCalculation: 'WHEN_REQUIRED', responseChecksumValidation: 'WHEN_REQUIRED',
+    requestHandler: { requestTimeout: 60_000, connectionTimeout: 5_000, throwOnRequestTimeout: true }, credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey } });
   return { client, input: { Bucket: config.bucket, Key: key } };
 }
 
-export async function putR2Object(key: string, data: Buffer, mimeType: string, sha256: string): Promise<void> {
+/**
+ * Browser uploads straight to R2. Type, exact length and If-None-Match are signed: the PUT cannot swap them, and once
+ * the object exists it is write-once, so bytes validated by confirmar cannot be replaced while the URL is still live.
+ */
+export async function signR2Upload(key: string, mimeType: string, bytes: number): Promise<string> {
   try {
     const { client, input } = object(key);
-    const mime = { pdf: 'application/pdf', jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[key.split('.').at(-1) ?? ''];
-    if (!data.length || data.length > maxBytes || mime !== mimeType || !/^[a-f0-9]{64}$/.test(sha256)) throw storageError();
-    try {
-      await client.send(new PutObjectCommand({ ...input, Body: data, ContentType: mimeType, ContentLength: data.length, Metadata: { sha256 }, IfNoneMatch: '*' }));
-    } catch (error) {
-      if ((error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode !== 412) throw error;
-      const existing = await client.send(new HeadObjectCommand(input));
-      if (existing.ContentLength !== data.length || existing.ContentType !== mimeType || existing.Metadata?.sha256 !== sha256) throw storageError();
-    }
-  } catch (cause) { throw new Error('No se pudo acceder al archivo. Inténtalo nuevamente.', { cause }); }
+    if (formats[key.split('.').at(-1) ?? ''] !== mimeType || !Number.isSafeInteger(bytes) || bytes <= 0 || bytes > maxBytes) throw storageError();
+    return await getSignedUrl(client, new PutObjectCommand({ ...input, ContentType: mimeType, ContentLength: bytes, IfNoneMatch: '*' }),
+      { expiresIn: 300, signableHeaders: new Set(['content-type', 'content-length', 'if-none-match']) });
+  } catch { throw storageError(); }
 }
 
 export async function readR2Object(key: string): Promise<{ data: Buffer; mimeType: string | undefined }> {
@@ -74,11 +76,11 @@ export async function deleteR2Object(key: string): Promise<void> {
   } catch { throw storageError(); }
 }
 
-export async function signR2Read(key: string, downloadName?: string): Promise<string> {
+export async function signR2Read(key: string, downloadName: string, disposition: 'inline' | 'attachment' = 'attachment'): Promise<string> {
   try {
     const { client, input } = object(key);
-    const safeName = downloadName?.replace(/[\x00-\x1f\x7f/\\"<>:|?*]/g, '').slice(0, 200);
-    const disposition = safeName ? `attachment; filename="${safeName.replace(/[^\x20-\x7e]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(safeName).replace(/['()*]/g, char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)}` : undefined;
-    return await getSignedUrl(client, new GetObjectCommand({ ...input, ResponseContentDisposition: disposition }), { expiresIn: 60 });
+    const safeName = downloadName.replace(/[\x00-\x1f\x7f/\\"<>:|?*]/g, '').slice(0, 200);
+    const header = `${disposition}; filename="${safeName.replace(/[^\x20-\x7e]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(safeName).replace(/['()*]/g, char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)}`;
+    return await getSignedUrl(client, new GetObjectCommand({ ...input, ResponseContentDisposition: header, ResponseCacheControl: 'private, no-store' }), { expiresIn: 60 });
   } catch { throw storageError(); }
 }

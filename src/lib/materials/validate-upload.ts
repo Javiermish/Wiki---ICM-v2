@@ -53,14 +53,20 @@ async function validatePdf(data: Buffer) {
   }
 }
 
+const invalidUpload = 'Archivo no válido o no permitido. Usa PDF, JPEG, PNG o WebP de hasta 25 MiB, sin contenido activo.';
+
+/** Declared name/type/size only: lets a reservation fail fast before any byte reaches R2. Never a substitute for validateUpload. */
+export function describeUpload(file: { name: string; type: string; size: number }): { mimeType: typeof formats[Extension]; extension: Extension } {
+  const suffix = file.name.split('.').at(-1)?.toLowerCase();
+  const extension = suffix === 'jpeg' ? 'jpg' : suffix;
+  if (!Number.isSafeInteger(file.size) || file.size <= 0 || file.size > maxBytes || !extension || !Object.hasOwn(formats, extension)
+    || file.type !== formats[extension as Extension]) throw new Error(invalidUpload);
+  return { mimeType: formats[extension as Extension], extension: extension as Extension };
+}
+
 export async function validateUpload(file: Upload): Promise<{ data: Buffer; mimeType: typeof formats[Extension]; extension: Extension; sha256: string; bytes: number }> {
   try {
-    if (!Number.isSafeInteger(file.size) || file.size <= 0 || file.size > maxBytes) throw new Error();
-    const suffix = file.name.split('.').at(-1)?.toLowerCase();
-    const extension = suffix === 'jpeg' ? 'jpg' : suffix;
-    if (!extension || !Object.hasOwn(formats, extension)) throw new Error();
-    const ext = extension as Extension;
-    if (file.type !== formats[ext]) throw new Error();
+    const { extension: ext } = describeUpload(file);
     const data = Buffer.from(await file.arrayBuffer());
     if (data.length !== file.size || data.length > maxBytes || !hasExpectedSignature(data, ext)) throw new Error();
     if (ext === 'pdf') await validatePdf(data);
@@ -73,6 +79,6 @@ export async function validateUpload(file: Upload): Promise<{ data: Buffer; mime
     }
     return { data, mimeType: formats[ext], extension: ext, sha256: createHash('sha256').update(data).digest('hex'), bytes: data.length };
   } catch {
-    throw new Error('Archivo no válido o no permitido. Usa PDF, JPEG, PNG o WebP de hasta 25 MiB, sin contenido activo.');
+    throw new Error(invalidUpload);
   }
 }
