@@ -19,6 +19,10 @@ export async function proxy(request: NextRequest) {
   const materialId = request.nextUrl.pathname.match(/^\/materiales\/([^/]+)\/?$/)?.[1];
   // Demo absence must also be resolved before the layout can stream HTTP 200.
   if (materialId?.startsWith("demo-") && !publicMaterialById(getDemoCatalog(), materialId)) return notFoundResponse();
+  // Neither a demo sample nor a UUID can ever exist, so this needs no Supabase configuration either.
+  const malformedMaterialId = materialId !== undefined && !materialId.startsWith("demo-")
+    && !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(materialId);
+  if (malformedMaterialId) return notFoundResponse();
   const config = getSupabaseConfig();
   if (!config) return invalidSemester ? notFoundResponse() : response;
   const supabase = createServerClient(config.url, config.key, {
@@ -46,7 +50,6 @@ export async function proxy(request: NextRequest) {
     if (!error && !data) return notFoundResponse();
   }
   if (materialId !== undefined && !materialId.startsWith("demo-")) {
-    if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(materialId)) return notFoundResponse();
     const { data, error } = await supabase.from("public_materials").select("id").eq("id", materialId).maybeSingle();
     if (!error && !data) return notFoundResponse();
   }
